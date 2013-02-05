@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace PlatformBuild
+﻿namespace PlatformBuild
 {
 	public class Program
 	{
-		static void Main(string[] args)
+		static void Main()
 		{
+			new Builder(new RealFileSystem()).Build();
 		}
 	}
 }
