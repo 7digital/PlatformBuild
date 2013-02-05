@@ -1,17 +1,23 @@
-﻿using System;
+﻿using PlatformBuild.FileSystem;
+using PlatformBuild.GitVCS;
 
 namespace PlatformBuild
 {
 	public class Builder
 	{
-		public Builder(IFileSystem realFileSystem)
+		readonly IFileSystem _files;
+		readonly IGit _git;
+
+		public Builder(IFileSystem files, IGit git)
 		{
-			throw new NotImplementedException();
+			_files = files;
+			_git = git;
 		}
 
 		public void Build()
 		{
-			throw new NotImplementedException();
+			var baseDir = _git.ParentRepo(_files.GetExeDirectory());
+			//using (var repo = new Repository(
 		}
 	}
 }

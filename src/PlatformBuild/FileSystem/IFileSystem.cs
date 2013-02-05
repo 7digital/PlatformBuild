@@ -1,7 +1,9 @@
-﻿namespace PlatformBuild
+﻿using System.IO;
+
+namespace PlatformBuild.FileSystem
 {
 	public interface IFileSystem
 	{
-		FilePath GetRootDirectory();
+		FilePath GetExeDirectory();
 	}
 }
