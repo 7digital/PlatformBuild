@@ -1,28 +1,43 @@
-﻿using System.IO;
+﻿using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace PlatformBuild.GitVCS
 {
 	public interface IGit
 	{
-		FilePath ParentRepo(FilePath currentDirectory);
-		void PullCurrent(FilePath repoDir);
+		void PullMaster(FilePath repoDir);
+		void Clone(FilePath repoDir, FilePath filePath, string repo);
+	}
+
+	public static class Cmd
+	{
+		public static int Call(this FilePath root, string exe, string args)
+		{
+			var proc = Process.Start(new ProcessStartInfo {
+				FileName = exe,
+				Arguments = args,
+				ErrorDialog = false,
+				UseShellExecute = true,
+				CreateNoWindow = true,
+				WorkingDirectory = root.ToEnvironmentalPath()
+			});
+			proc.WaitForExit();
+			return proc.ExitCode;
+		}
 	}
 
 	public class Git : IGit
 	{
-		public FilePath ParentRepo(FilePath currentDirectory)
+		public void PullMaster(FilePath repoDir)
 		{
-			return new FilePath(/*Repository.Discover(currentDirectory.ToEnvironmentalPath())*/ "FIXME");
+			repoDir.Call("git", "stash");
+			repoDir.Call("git", "pull origin master");
 		}
 
-		public void PullCurrent(FilePath repoDir)
+		public void Clone(FilePath repoDir, FilePath filePath, string repo)
 		{
-			/*using (var repo = new Repository(repoDir.ToEnvironmentalPath()))
-			{
-				repo.Fetch("origin");
-				
-			}*/
+			repoDir.Call("git", "clone "+repo+" "+filePath.Unroot(repoDir).ToPosixPath());
 		}
 	}
 }

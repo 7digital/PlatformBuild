@@ -21,7 +21,6 @@ namespace Unit.Tests
 			_filesystem.GetExeDirectory().Returns(A.ExeDirectory);
 
 			_git = Substitute.For<IGit>();
-			_git.ParentRepo(Arg.Any<FilePath>()).Returns(A.ParentRepoDir);
 			
 			_subject = new Builder(_filesystem, _git);
 			_subject.Build();
@@ -31,13 +30,12 @@ namespace Unit.Tests
 		public void gets_its_own_directory_and_finds_repo()
 		{
 			_filesystem.Received().GetExeDirectory();
-			_git.Received().ParentRepo(A.ExeDirectory);
 		}
 
 		[Test]
 		public void pulls_the_current_branch_of_the_base_repo()
 		{
-			_git.Received().PullCurrent(A.ParentRepoDir);
+			_git.Received().PullMaster(A.ExeDirectory);
 		}
 	}
 }
