@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Linq;
-using LibGit2Sharp;
 
 namespace PlatformBuild.GitVCS
 {
@@ -14,16 +13,16 @@ namespace PlatformBuild.GitVCS
 	{
 		public FilePath ParentRepo(FilePath currentDirectory)
 		{
-			return new FilePath(Repository.Discover(currentDirectory.ToEnvironmentalPath()));
+			return new FilePath(/*Repository.Discover(currentDirectory.ToEnvironmentalPath())*/ "FIXME");
 		}
 
 		public void PullCurrent(FilePath repoDir)
 		{
-			using (var repo = new Repository(repoDir.ToEnvironmentalPath()))
+			/*using (var repo = new Repository(repoDir.ToEnvironmentalPath()))
 			{
 				repo.Fetch("origin");
 				
-			}
+			}*/
 		}
 	}
 }

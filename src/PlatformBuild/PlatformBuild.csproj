@@ -35,9 +35,6 @@
     <Reference Include="LessStupidPath">
       <HintPath>..\..\lib\LessStupidPath.dll</HintPath>
     </Reference>
-    <Reference Include="LibGit2Sharp">
-      <HintPath>..\..\lib\LibGit2Sharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />

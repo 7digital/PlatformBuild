@@ -17,7 +17,7 @@ namespace PlatformBuild
 		public void Build()
 		{
 			var baseDir = _git.ParentRepo(_files.GetExeDirectory());
-			//using (var repo = new Repository(
+			_git.PullCurrent(baseDir);
 		}
 	}
 }
