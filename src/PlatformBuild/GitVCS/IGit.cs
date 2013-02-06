@@ -8,6 +8,8 @@ namespace PlatformBuild.GitVCS
 	{
 		void PullMaster(FilePath repoDir);
 		void Clone(FilePath repoDir, FilePath filePath, string repo);
+		void ResetLib(FilePath modulePath);
+		void PullCurrentBranch(FilePath modulePath);
 	}
 
 	public static class Cmd
@@ -38,6 +40,16 @@ namespace PlatformBuild.GitVCS
 		public void Clone(FilePath repoDir, FilePath filePath, string repo)
 		{
 			repoDir.Call("git", "clone "+repo+" "+filePath.Unroot(repoDir).ToPosixPath());
+		}
+
+		public void ResetLib(FilePath modulePath)
+		{
+			throw new System.NotImplementedException();
+		}
+
+		public void PullCurrentBranch(FilePath modulePath)
+		{
+			throw new System.NotImplementedException();
 		}
 	}
 }

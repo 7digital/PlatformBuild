@@ -23,7 +23,7 @@ namespace Unit.Tests
 			_git = Substitute.For<IGit>();
 			
 			_subject = new Builder(_filesystem, _git);
-			_subject.Build();
+			_subject.Prepare();
 		}
 
 		[Test]

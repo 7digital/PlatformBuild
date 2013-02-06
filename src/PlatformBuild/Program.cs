@@ -7,7 +7,9 @@ namespace PlatformBuild
 	{
 		static void Main()
 		{
-			new Builder(new RealFileSystem(), new Git()).Build();
+			var thing = new Builder(new RealFileSystem(), new Git());
+			thing.Prepare();
+			thing.RunBuild();
 		}
 	}
 }

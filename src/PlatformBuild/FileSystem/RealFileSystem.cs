@@ -20,5 +20,10 @@ namespace PlatformBuild.FileSystem
 		{
 			return File.ReadAllLines(path.ToEnvironmentalPath());
 		}
+
+		public void DeepCopyByPattern(FilePath source, FilePath dest, string pattern)
+		{
+			throw new System.NotImplementedException();
+		}
 	}
 }

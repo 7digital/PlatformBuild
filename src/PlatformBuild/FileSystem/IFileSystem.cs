@@ -7,5 +7,6 @@ namespace PlatformBuild.FileSystem
 		FilePath GetExeDirectory();
 		bool Exists(FilePath filePath);
 		string[] Lines(FilePath path);
+		void DeepCopyByPattern(FilePath source, FilePath dest, string pattern);
 	}
 }

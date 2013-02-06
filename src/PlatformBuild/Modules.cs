@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using PlatformBuild.FileSystem;
 
 namespace PlatformBuild
@@ -12,21 +14,17 @@ namespace PlatformBuild
 		public string[] Paths { get; private set; }
 		public List<int>[] Deps { get; private set; }
 
-
 		public Modules(FilePath filePath, IFileSystem files)
 		{
 			_files = files;
 			ReadModules(filePath);
 		}
 
-		public void SortInDependencyOrder()
-		{
-			// go simple.
-		}
-
-		/// <summary>go find the build folder for each module.
-		/// match in paths, write index to deps</summary>
-		public void BuildDependencies(FilePath rootPath)
+		/// <summary> (1)
+		/// go find the build folder for each module.
+		/// match in paths, write index to deps
+		/// </summary>
+		public void ReadDependencies(FilePath rootPath)
 		{
 			for (int i = 0; i < Paths.Length; i++)
 			{
@@ -40,7 +38,67 @@ namespace PlatformBuild
 					Deps[i].Add(Paths.Index(line));
 				}
 			}
-			
+		}
+
+		/// <summary> (2)
+		/// put modules in order, so we can build and distribute without
+		/// getting any out-of-date libraries
+		/// </summary>
+		public void SortInDependencyOrder()
+		{
+			var @in = Enumerable.Range(0, Paths.Length).ToList();
+			var @out = new List<int>();
+			// go simple. scan @in, if @out contains, remove&append
+			// if no change in a whole loop, then circular dependency.
+
+			var noLoops = true;
+			while (noLoops)
+			{
+				noLoops = false;
+				for (int i = 0; i < @in.Count; i++)
+				{
+					if (CanAdd(Deps[@in[i]], @out))
+					{
+						@in.RemoveAt(i);
+						@out.Add(i);
+						noLoops = true;
+					}
+				}
+			}
+			if (@in.Count> 0) throw new Exception("Circular dependency involving "+string.Join(", ", @in.Select(ix=>Paths[ix])));
+
+			var newRepos = new List<string>();
+			var newPaths = new List<string>();
+			var newDeps = new List<List<int>>();
+
+			foreach (var idx in @out)
+			{
+				newRepos.Add(Repos[idx]);
+				newPaths.Add(Paths[idx]);
+				newDeps.Add(Deps[idx]);
+			}
+
+			Repos = newRepos.ToArray();
+			Paths = newPaths.ToArray();
+			Deps = newDeps.ToArray();
+		}
+
+		/// <summary> (3)
+		/// Build a set of locks so builds don't get ahead of git-pulls
+		/// </summary>
+		public IList<AutoResetEvent> CreateAndSetLocks()
+		{
+			var l = new List<AutoResetEvent>();
+			for (int i = 0; i < Paths.Length; i++)
+			{
+				l.Add(new AutoResetEvent(false));
+			}
+			return l;
+		}
+
+		static bool CanAdd(IEnumerable<int> required, ICollection<int> available)
+		{
+			return required.All(available.Contains);
 		}
 
 		FilePath BuildPath(FilePath filePath, string path)
