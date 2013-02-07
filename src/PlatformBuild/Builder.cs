@@ -15,16 +15,18 @@ namespace PlatformBuild
 		readonly IGit _git;
 		readonly IDependencyManager _depMgr;
 		readonly IRuleFactory _rules;
+		readonly IBuildCmd _builder;
 		FilePath _rootPath;
 		public IModules Modules { get; private set; }
 		IList<AutoResetEvent> _locks;
 
-		public Builder(IFileSystem files, IGit git, IDependencyManager depMgr, IRuleFactory rules)
+		public Builder(IFileSystem files, IGit git, IDependencyManager depMgr, IRuleFactory rules, IBuildCmd builder)
 		{
 			_files = files;
 			_git = git;
 			_depMgr = depMgr;
 			_rules = rules;
+			_builder = builder;
 		}
 
 		public void Prepare()
@@ -80,7 +82,7 @@ namespace PlatformBuild
 
 				if (!_files.Exists(buildPath)) continue;
 
-				int code = buildPath.Call("Build.cmd", "");
+				int code = _builder.Build(buildPath);
 				if (code != 0) Console.WriteLine("Build error!");
 				// todo : handle errors!
 

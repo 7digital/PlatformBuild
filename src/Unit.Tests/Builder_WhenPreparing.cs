@@ -18,14 +18,16 @@ namespace Unit.Tests
 		IDependencyManager _depMgr;
 		IRuleFactory _ruleFac;
 		IModules _modules;
+		FilePath _missingRepo;
 
 		[SetUp]
 		public void builder()
 		{
 			_filesystem = Substitute.For<IFileSystem>();
 			_filesystem.GetPlatformRoot().Returns(The.Root);
+			_missingRepo = The.Root.Append((FilePath)"/group1/proj2");
 
-            _filesystem.Exists(null).Returns(c=> (c.Args()[0] != (FilePath)"group1/proj2"));
+            _filesystem.Exists(null).ReturnsForAnyArgs(c=> (c.Args()[0] as FilePath !=_missingRepo));
 
 			_modules = Substitute.For<IModules>();
 			_modules.Paths.Returns(new[] {"group1/proj1", "group1/proj2", "group2/proj3"});
@@ -36,7 +38,7 @@ namespace Unit.Tests
 			_ruleFac = Substitute.For<IRuleFactory>();
 			_ruleFac.GetModules().Returns(_modules);
 
-			_subject = new Builder(_filesystem, _git, _depMgr, _ruleFac);
+			_subject = new Builder(_filesystem, _git, _depMgr, _ruleFac, null);
 			_subject.Prepare();
 		}
 
@@ -61,9 +63,7 @@ namespace Unit.Tests
         [Test]
         public void clones_missing_repos ()
         {
-            var missingPath = The.Root.Append((FilePath)"/group1/proj2");
-            var m = Arg.Is<FilePath>(fp => fp.ToPosixPath() == missingPath.ToPosixPath());
-            _git.Received().Clone(The.Root, m, "p2Repo");
+            _git.Received().Clone(The.Root, _missingRepo, "p2Repo");
         }
 
 		[Test]

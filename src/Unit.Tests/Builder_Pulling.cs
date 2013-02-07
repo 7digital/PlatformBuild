@@ -33,7 +33,7 @@ namespace Unit.Tests
 			_filesystem = Substitute.For<IFileSystem>();
 			_filesystem.GetPlatformRoot().Returns(The.Root);
 
-            _filesystem.Exists(null).Returns(c=> (c.Args()[0] != (FilePath)"group1/proj2"));
+            _filesystem.Exists(null).ReturnsForAnyArgs(c=> (c.Args()[0] as FilePath != (FilePath)"group1/proj2"));
 
 			_modules = Substitute.For<IModules>();
 			_modules.Paths.Returns(new[] {"group1/proj1", "group1/proj2", "group2/proj3"});
@@ -46,7 +46,7 @@ namespace Unit.Tests
 			_ruleFac = Substitute.For<IRuleFactory>();
 			_ruleFac.GetModules().Returns(_modules);
 
-			_subject = new Builder(_filesystem, _git, _depMgr, _ruleFac);
+			_subject = new Builder(_filesystem, _git, _depMgr, _ruleFac, null);
 			_subject.Prepare();
 			_subject.PullRepos();
 		}
@@ -71,6 +71,8 @@ namespace Unit.Tests
 		public void sets_all_wait_events()
 		{
 			Assert.That(_locks[0].WaitOne(10), Is.True);
+			Assert.That(_locks[1].WaitOne(10), Is.True);
+			Assert.That(_locks[2].WaitOne(10), Is.True);
 		}
 	}
 }

@@ -13,8 +13,9 @@ namespace PlatformBuild
             var rules = new RuleFactory(files.GetPlatformRoot(), files);
             var deps = new DependencyManager(rules.DependencyPattern);
             var git = new Git();
+			var build = new BuildCmd();
 
-			var thing = new Builder(files, git, deps, rules); 
+			var thing = new Builder(files, git, deps, rules, build); 
 
 			thing.Prepare();
 			thing.RunBuild();

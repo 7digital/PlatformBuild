@@ -44,14 +44,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CmdLineProxies\BuildCmd.cs" />
     <Compile Include="Crap\ArrayExtensions.cs" />
     <Compile Include="Builder.cs" />
     <Compile Include="DependencyManagement\DependencyManager.cs" />
     <Compile Include="FileSystem\IFileSystem.cs" />
-    <Compile Include="GitVCS\Cmd.cs" />
-    <Compile Include="GitVCS\Git.cs" />
-    <Compile Include="GitVCS\IGit.cs" />
+    <Compile Include="CmdLineProxies\Cmd.cs" />
+    <Compile Include="CmdLineProxies\Git.cs" />
+    <Compile Include="CmdLineProxies\IGit.cs" />
     <Compile Include="DependencyManagement\IDependencyManager.cs" />
+    <Compile Include="CmdLineProxies\IBuildCmd.cs" />
     <Compile Include="Rules\IModules.cs" />
     <Compile Include="Rules\IRuleFactory.cs" />
     <Compile Include="Rules\Modules.cs" />
