@@ -1,5 +1,7 @@
-﻿using PlatformBuild.FileSystem;
+﻿using PlatformBuild.DependencyManagement;
+using PlatformBuild.FileSystem;
 using PlatformBuild.GitVCS;
+using PlatformBuild.Rules;
 
 namespace PlatformBuild
 {
@@ -7,7 +9,13 @@ namespace PlatformBuild
 	{
 		static void Main()
 		{
-			var thing = new Builder(new RealFileSystem(), new Git());
+            var files = new RealFileSystem();
+            var rules = new RuleFactory(files.GetPlatformRoot(), files);
+            var deps = new DependencyManager(rules.DependencyPattern);
+            var git = new Git();
+
+			var thing = new Builder(files, git, deps, rules); 
+
 			thing.Prepare();
 			thing.RunBuild();
 		}

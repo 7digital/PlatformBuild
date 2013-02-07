@@ -48,9 +48,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="A.cs" />
+    <Compile Include="The.cs" />
     <Compile Include="DependencyOrderTests.cs" />
-    <Compile Include="StartupTests.cs" />
+    <Compile Include="Builder_WhenPreparing.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

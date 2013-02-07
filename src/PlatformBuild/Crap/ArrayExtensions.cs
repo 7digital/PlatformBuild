@@ -1,4 +1,4 @@
-﻿namespace PlatformBuild
+﻿namespace PlatformBuild.Crap
 {
 	public static class ArrayExtensions
 	{

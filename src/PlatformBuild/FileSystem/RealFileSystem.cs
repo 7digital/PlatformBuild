@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -7,9 +8,18 @@ namespace PlatformBuild.FileSystem
 {
 	public class RealFileSystem : IFileSystem
 	{
-		public FilePath GetExeDirectory()
+		public FilePath GetPlatformRoot()
 		{
-			return new FilePath(Assembly.GetExecutingAssembly().Location);
+            var here= Assembly.GetExecutingAssembly().Location;
+            
+            while (!Directory.Exists(Path.Combine(here, ".git")))
+            {
+                var next = Path.Combine(here, "..");
+                if (here == next) throw new Exception("Not in a Git build platform");
+                here = next;
+            }
+
+			return new FilePath(here);
 		}
 
 		public bool Exists(FilePath filePath)
@@ -23,12 +33,6 @@ namespace PlatformBuild.FileSystem
 			return File.ReadAllLines(path.ToEnvironmentalPath());
 		}
 
-		public void DeepCopyByPattern(FilePath source, FilePath dest, string pattern)
-		{
-			var destFiles = Directory.GetFiles(dest.ToEnvironmentalPath(), "*.dll", SearchOption.AllDirectories); // todo: get from rules
-
-
-		}
 
 		public IEnumerable<FilePath> SortedDescendants(FilePath filePath, string pattern)
 		{

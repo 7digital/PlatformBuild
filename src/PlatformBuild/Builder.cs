@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using PlatformBuild.DependencyManagement;
 using PlatformBuild.FileSystem;
 using PlatformBuild.GitVCS;
+using PlatformBuild.Rules;
 
 namespace PlatformBuild
 {
@@ -11,26 +13,28 @@ namespace PlatformBuild
 	{
 		readonly IFileSystem _files;
 		readonly IGit _git;
-		readonly FilePath _modulesPath = new FilePath("_rules/Modules.rule");
+		readonly IDependencyManager _depMgr;
+		readonly IRuleFactory _rules;
 		FilePath _rootPath;
-		public Modules Modules { get; private set; }
+		public IModules Modules { get; private set; }
 		IList<AutoResetEvent> _locks;
 
-		public Builder(IFileSystem files, IGit git)
+		public Builder(IFileSystem files, IGit git, IDependencyManager depMgr, IRuleFactory rules)
 		{
 			_files = files;
 			_git = git;
+			_depMgr = depMgr;
+			_rules = rules;
 		}
 
 		public void Prepare()
 		{
-			_rootPath = _files.GetExeDirectory();
-			var rulesFile = _rootPath.Navigate(_modulesPath);
+			_rootPath = _files.GetPlatformRoot();
 
 			_git.PullMaster(_rootPath);
 
-			Modules = new Modules(rulesFile, _files);
-			CloneMissingRepos(Modules, _rootPath);
+            Modules = _rules.GetModules();
+			CloneMissingRepos();
 
 			Modules.ReadDependencies(_rootPath);
 			Modules.SortInDependencyOrder();
@@ -67,58 +71,53 @@ namespace PlatformBuild
 		{
 			for (int i = 0; i < Modules.Paths.Length; i++)
 			{
-				var moduleBuildPath = new FilePath(Modules.Paths[i] + "/build");
-				var moduleLibPath = new FilePath(Modules.Paths[i] + "/lib");
+				var buildPath = _rootPath.Navigate((FilePath)(Modules.Paths[i] + "/build"));
+				var libPath = _rootPath.Navigate((FilePath)(Modules.Paths[i] + "/lib"));
+				var srcPath = _rootPath.Navigate((FilePath)(Modules.Paths[i] + "/src"));
 				_locks[i].WaitOne();
 
-				CopyDependencies(i, moduleLibPath);
+				CopyDependencies(libPath);
 
-				if (_files.Exists(moduleBuildPath))
-				{
-					int code = moduleBuildPath.Call("Build.cmd", "");
-                    if (code != 0) Console.WriteLine("Build error!");
-					// todo : handle errors!
-				}
+				if (!_files.Exists(buildPath)) continue;
+
+				int code = buildPath.Call("Build.cmd", "");
+				if (code != 0) Console.WriteLine("Build error!");
+				// todo : handle errors!
+
+				_depMgr.UpdateAvailableDependencies(srcPath);
 			}
 		}
 
         public void RebuildDatabases()
         {
 
-	        foreach (var path in Modules.Paths)
-	        {
-		        var dbPath = new FilePath(path+"/DatabaseScripts");
-                if (!_files.Exists(dbPath)) continue;
-
-                foreach (FilePath file in _files.SortedDescendants(dbPath, "*.sql"))
-                {
-                    _rootPath.Call("_build/Sqlfk.exe", file.ToEnvironmentalPath());
-                }
-	        }
-        }
-
-		void CopyDependencies(int i, FilePath moduleLibPath)
-		{
-			foreach (var idx in Modules.Deps[i])
+			foreach (var path in Modules.Paths)
 			{
-				var source = _rootPath.Navigate(new FilePath(Modules.Paths[idx] + "/src"));
-				var dest = _rootPath.Navigate(moduleLibPath);
+				var dbPath = new FilePath(path + "/DatabaseScripts");
+				if (!_files.Exists(dbPath)) continue;
 
-				const string pattern = "*.dll"; // todo: get this from rules file!
-
-				_files.DeepCopyByPattern(source, dest, pattern);
+				foreach (FilePath file in _files.SortedDescendants(dbPath, "*.sql"))
+				{
+					_rootPath.Call("_build/Sqlfk.exe", file.ToEnvironmentalPath());
+				}
 			}
 		}
 
-		void CloneMissingRepos(Modules modules, FilePath root)
+		void CopyDependencies(FilePath moduleLibPath)
 		{
-			for (int i= 0; i < modules.Paths.Length; i++)
+			var dest = _rootPath.Navigate(moduleLibPath);
+			_depMgr.CopyBuildResultsTo(dest);
+		}
+
+		void CloneMissingRepos()
+		{
+			for (int i= 0; i < Modules.Paths.Length; i++)
 			{
-				var path = modules.Paths[i];
-				var expected = root.Navigate(new FilePath(path));
+				var path = Modules.Paths[i];
+				var expected = _rootPath.Navigate(new FilePath(path));
 				if (_files.Exists(expected)) continue;
 
-				_git.Clone(_rootPath, expected, modules.Repos[i]);
+				_git.Clone(_rootPath, expected, Modules.Repos[i]);
 			}
 		}
 	}

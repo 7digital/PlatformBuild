@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using PlatformBuild.Crap;
 using PlatformBuild.FileSystem;
 
 namespace PlatformBuild
 {
-	public class Modules
+	public class Modules : IModules
 	{
 		readonly FilePath _rootPath;
 		readonly IFileSystem _files;
