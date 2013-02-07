@@ -1,4 +1,10 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using PlatformBuild;
@@ -10,14 +16,16 @@ using PlatformBuild.Rules;
 namespace Unit.Tests
 {
 	[TestFixture]
-	public class Builder_WhenPreparing
+	public class Builder_Pulling
 	{
+		
 		Builder _subject;
 		IFileSystem _filesystem;
 		IGit _git;
 		IDependencyManager _depMgr;
 		IRuleFactory _ruleFac;
 		IModules _modules;
+		IList<AutoResetEvent> _locks;
 
 		[SetUp]
 		public void builder()
@@ -30,6 +38,8 @@ namespace Unit.Tests
 			_modules = Substitute.For<IModules>();
 			_modules.Paths.Returns(new[] {"group1/proj1", "group1/proj2", "group2/proj3"});
 			_modules.Repos.Returns(new[] {"p1Repo", "p2Repo", "p3Repo"});
+			_locks = new List<AutoResetEvent> { new AutoResetEvent(false), new AutoResetEvent(false), new AutoResetEvent(false) };
+			_modules.CreateAndSetLocks().Returns(_locks);
 
 			_git = Substitute.For<IGit>();
 			_depMgr = Substitute.For<IDependencyManager>();
@@ -38,44 +48,25 @@ namespace Unit.Tests
 
 			_subject = new Builder(_filesystem, _git, _depMgr, _ruleFac);
 			_subject.Prepare();
+			_subject.PullRepos();
 		}
 
 		[Test]
-		public void gets_its_own_directory_and_finds_repo()
+		public void resets_all_lib_folders()
 		{
-			_filesystem.Received().GetPlatformRoot();
+			_git.Received().ResetLib(new FilePath("group1/proj1"));
 		}
 
 		[Test]
-		public void pulls_the_current_branch_of_the_base_repo()
+		public void pulls_changes ()
 		{
-			_git.Received().PullMaster(The.Root);
+			_git.Received(3).PullCurrentBranch(new FilePath("group1/proj1"));
 		}
 
 		[Test]
-		public void get_modules_from_rules()
+		public void sets_all_wait_events()
 		{
-			_ruleFac.Received().GetModules();
-		}
-
-        [Test]
-        public void clones_missing_repos ()
-        {
-            var missingPath = The.Root.Append((FilePath)"/group1/proj2");
-            var m = Arg.Is<FilePath>(fp => fp.ToPosixPath() == missingPath.ToPosixPath());
-            _git.Received().Clone(The.Root, m, "p2Repo");
-        }
-
-		[Test]
-		public void sorts_dependencies()
-		{
-            _modules.Received().SortInDependencyOrder();
-		}
-
-		[Test]
-		public void builds_pull_locks()
-		{
-			_modules.Received().CreateAndSetLocks();
+			Assert.That(_locks[0].WaitOne(10), Is.True);
 		}
 	}
 }

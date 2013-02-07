@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Builder_Pulling.cs" />
     <Compile Include="The.cs" />
     <Compile Include="DependencyOrderTests.cs" />
     <Compile Include="Builder_WhenPreparing.cs" />
