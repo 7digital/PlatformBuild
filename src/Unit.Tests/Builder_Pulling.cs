@@ -54,13 +54,17 @@ namespace Unit.Tests
 		[Test]
 		public void resets_all_lib_folders()
 		{
-			_git.Received().ResetLib(new FilePath("group1/proj1"));
+			_git.Received(1).ResetLib(new FilePath("group1/proj1"));
+			_git.Received(1).ResetLib(new FilePath("group1/proj2"));
+			_git.Received(1).ResetLib(new FilePath("group2/proj3"));
 		}
 
 		[Test]
 		public void pulls_changes ()
 		{
-			_git.Received(3).PullCurrentBranch(new FilePath("group1/proj1"));
+			_git.Received(1).PullCurrentBranch(new FilePath("group1/proj1"));
+			_git.Received(1).PullCurrentBranch(new FilePath("group1/proj2"));
+			_git.Received(1).PullCurrentBranch(new FilePath("group2/proj3"));
 		}
 
 		[Test]
