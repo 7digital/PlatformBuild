@@ -9,15 +9,16 @@ namespace PlatformBuild
 {
 	public class Modules
 	{
+		readonly FilePath _rootPath;
 		readonly IFileSystem _files;
-		public string[] Repos { get; private set; }
-		public string[] Paths { get; private set; }
-		public List<int>[] Deps { get; private set; }
+		public string[] Repos { get; set; }
+		public string[] Paths { get; set; }
+		public List<int>[] Deps { get; set; }
 
 		public Modules(FilePath filePath, IFileSystem files)
 		{
+			_rootPath = filePath;
 			_files = files;
-			ReadModules(filePath);
 		}
 
 		/// <summary> (1)
@@ -26,6 +27,7 @@ namespace PlatformBuild
 		/// </summary>
 		public void ReadDependencies(FilePath rootPath)
 		{
+			ReadModules(_rootPath);
 			for (int i = 0; i < Paths.Length; i++)
 			{
 				var path = Paths[i];
@@ -59,13 +61,14 @@ namespace PlatformBuild
 				{
 					if (CanAdd(Deps[@in[i]], @out))
 					{
+						@out.Add(@in[i]);
 						@in.RemoveAt(i);
-						@out.Add(i);
 						noLoops = true;
+						break;
 					}
 				}
 			}
-			if (@in.Count> 0) throw new Exception("Circular dependency involving "+string.Join(", ", @in.Select(ix=>Paths[ix])));
+			if (@in.Count > 0) throw new Exception("Circular dependency involving " + string.Join(", ", @in.Select(ix => Paths[ix])));
 
 			var newRepos = new List<string>();
 			var newPaths = new List<string>();
