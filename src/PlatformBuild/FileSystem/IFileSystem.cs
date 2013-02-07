@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 
 namespace PlatformBuild.FileSystem
 {
@@ -8,5 +9,6 @@ namespace PlatformBuild.FileSystem
 		bool Exists(FilePath filePath);
 		string[] Lines(FilePath path);
 		void DeepCopyByPattern(FilePath source, FilePath dest, string pattern);
+		IEnumerable<FilePath> SortedDescendants(FilePath filePath, string pattern);
 	}
 }

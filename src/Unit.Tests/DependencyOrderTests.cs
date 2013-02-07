@@ -29,9 +29,9 @@ namespace Unit.Tests
 			_subject.Deps = new[]{
 				new List<int>{4,3},
 				new List<int>{0,3,2},
-				new List<int>{},
+				new List<int>(),
 				new List<int>{4,2},
-				new List<int>{},
+				new List<int>(),
 				new List<int>{2,1,0}
 			};
 		}

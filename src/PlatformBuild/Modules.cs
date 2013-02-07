@@ -108,7 +108,7 @@ namespace PlatformBuild
 		{
 			return 
 				filePath.Navigate(
-				new FilePath(path+"/Build/Depends.rule"))
+				new FilePath(path+"/lib/Depends.rule"))
 				;
 		}
 

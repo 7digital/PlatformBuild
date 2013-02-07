@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace PlatformBuild.FileSystem
@@ -23,7 +25,17 @@ namespace PlatformBuild.FileSystem
 
 		public void DeepCopyByPattern(FilePath source, FilePath dest, string pattern)
 		{
-			throw new System.NotImplementedException();
+			var destFiles = Directory.GetFiles(dest.ToEnvironmentalPath(), "*.dll", SearchOption.AllDirectories); // todo: get from rules
+
+
+		}
+
+		public IEnumerable<FilePath> SortedDescendants(FilePath filePath, string pattern)
+		{
+			var list = Directory.GetFiles(filePath.ToEnvironmentalPath(), pattern, SearchOption.AllDirectories)
+				.ToList();
+			list.Sort();
+			return list.Select(f => new FilePath(f));
 		}
 	}
 }

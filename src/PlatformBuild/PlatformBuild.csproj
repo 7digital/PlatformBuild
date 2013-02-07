@@ -47,6 +47,7 @@
     <Compile Include="Crap\ArrayExtensions.cs" />
     <Compile Include="Builder.cs" />
     <Compile Include="FileSystem\IFileSystem.cs" />
+    <Compile Include="GitVCS\Cmd.cs" />
     <Compile Include="GitVCS\IGit.cs" />
     <Compile Include="Modules.cs" />
     <Compile Include="Program.cs" />

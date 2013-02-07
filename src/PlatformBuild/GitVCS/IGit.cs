@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 
 namespace PlatformBuild.GitVCS
@@ -10,23 +9,6 @@ namespace PlatformBuild.GitVCS
 		void Clone(FilePath repoDir, FilePath filePath, string repo);
 		void ResetLib(FilePath modulePath);
 		void PullCurrentBranch(FilePath modulePath);
-	}
-
-	public static class Cmd
-	{
-		public static int Call(this FilePath root, string exe, string args)
-		{
-			var proc = Process.Start(new ProcessStartInfo {
-				FileName = exe,
-				Arguments = args,
-				ErrorDialog = false,
-				UseShellExecute = true,
-				CreateNoWindow = true,
-				WorkingDirectory = root.ToEnvironmentalPath()
-			});
-			proc.WaitForExit();
-			return proc.ExitCode;
-		}
 	}
 
 	public class Git : IGit
@@ -44,7 +26,8 @@ namespace PlatformBuild.GitVCS
 
 		public void ResetLib(FilePath modulePath)
 		{
-			throw new System.NotImplementedException();
+			var path = modulePath.Navigate(new FilePath("lib"));
+            path.Call("git", "reset --hard HEAD");
 		}
 
 		public void PullCurrentBranch(FilePath modulePath)
