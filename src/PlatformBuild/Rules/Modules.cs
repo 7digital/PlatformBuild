@@ -38,6 +38,9 @@ namespace PlatformBuild.Rules
 				var lines = _files.Lines(buildRuleFile);
 				foreach (var line in lines)
 				{
+                    var depRef = Paths.Index(line);
+                    if (depRef < 0)
+	                    throw new Exception(path + " requires unknown module "+line);
 					Deps[i].Add(Paths.Index(line));
 				}
 			}
@@ -60,6 +63,7 @@ namespace PlatformBuild.Rules
 				noLoops = false;
 				for (int i = 0; i < @in.Count; i++)
 				{
+                    if (SelfReferencing(@in[i])) throw new Exception(Paths[@in[i]] + " is self referencing");
 					if (CanAdd(Deps[@in[i]], @out))
 					{
 						@out.Add(@in[i]);
@@ -69,7 +73,11 @@ namespace PlatformBuild.Rules
 					}
 				}
 			}
-			if (@in.Count > 0) throw new Exception("Circular dependency involving " + string.Join(", ", @in.Select(ix => Paths[ix])));
+			if (@in.Count > 0) 
+				throw new Exception("Circular dependency. In: " 
+					+ string.Join(", ", @in.Select(ix => Paths[ix]))
+					+ "\r\nOut: "+ string.Join(", ",  @out.Select(ix => Paths[ix]))
+					);
 
 			var newRepos = new List<string>();
 			var newPaths = new List<string>();
@@ -85,6 +93,16 @@ namespace PlatformBuild.Rules
 			Repos = newRepos.ToArray();
 			Paths = newPaths.ToArray();
 			Deps = newDeps.ToArray();
+		}
+
+		bool SelfReferencing(int idx)
+		{
+            var selfName = Paths[idx];
+			var depNames = Deps[idx].Select(i=>Paths[i]).ToArray();
+
+
+			Console.WriteLine(selfName + " <-- " + string.Join(", ", depNames));
+            return depNames.Contains(selfName);
 		}
 
 		/// <summary> (3)
