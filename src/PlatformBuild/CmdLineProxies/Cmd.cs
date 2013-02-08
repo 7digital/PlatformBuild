@@ -39,13 +39,13 @@ namespace PlatformBuild.CmdLineProxies
                 try { proc.Kill(); } catch { }
 // ReSharper restore EmptyGeneralCatchClause
 			}
+            var messages = proc.StandardOutput.ReadToEnd();
+			if (proc.ExitCode != 0) LogOutput.Log.Error(messages);
+			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(messages);
 
 			var errors = proc.StandardError.ReadToEnd();
             if (!string.IsNullOrWhiteSpace(errors)) LogOutput.Log.Error(proc.StandardError.ReadToEnd());
 
-            var messages = proc.StandardOutput.ReadToEnd();
-			if (proc.ExitCode != 0) LogOutput.Log.Error(messages);
-			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(messages);
 
 			return proc.ExitCode;
 		}

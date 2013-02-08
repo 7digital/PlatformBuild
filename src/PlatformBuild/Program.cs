@@ -14,6 +14,7 @@ namespace PlatformBuild
             var start = DateTime.Now;
 
             if (args.Length > 0) Log.SetLevel(args[0]);
+            else Log.SetLevel("status");
 
             var files = new RealFileSystem();
             var rules = new RuleFactory(files.GetPlatformRoot(), files);

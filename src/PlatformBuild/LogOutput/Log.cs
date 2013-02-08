@@ -4,7 +4,7 @@ namespace PlatformBuild.LogOutput
 {
 	public static class Log
 	{
-        static int level = 0;
+        static int level;
 
         // 0 -> errors only
         // 1 -> status
