@@ -134,7 +134,7 @@ namespace PlatformBuild
 				var sqlSpecificPath = dbPath.Navigate((FilePath)"SqlServer");
 
 				if (!_files.Exists(dbPath)) continue;
-				Log.Info("Scripts from " + dbPath.ToEnvironmentalPath());
+				Log.Status("Scripts from " + dbPath.ToEnvironmentalPath());
 
 				var finalSrcPath = (_files.Exists(sqlSpecificPath)) ? (sqlSpecificPath) : (dbPath);
 
