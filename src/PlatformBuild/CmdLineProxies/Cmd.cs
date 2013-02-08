@@ -8,14 +8,19 @@ namespace PlatformBuild.CmdLineProxies
 	{
         static readonly object _writeLock = new Object();
 
+        public static int CallInFolder(this FilePath root, string exe, string args)
+        {
+            return Call(root, root.Navigate((FilePath)exe).ToEnvironmentalPath(), args);
+        }
+
 		public static int Call(this FilePath root, string exe, string args)
 		{
 			var isBatch = exe.EndsWith(".cmd") || exe.EndsWith(".bat");
 
 			var bin = (isBatch) ? ("cmd") : (exe);
 			var rargs = (isBatch) ? ("/c " + exe + " " + args) : args;
-			//Console.WriteLine(root.Navigate((FilePath)exe).ToEnvironmentalPath() + " " + args);
-			var proc = Process.Start(new ProcessStartInfo
+
+			var processStartInfo = new ProcessStartInfo
 			{
 				FileName = bin,
 				Arguments = rargs,
@@ -24,10 +29,13 @@ namespace PlatformBuild.CmdLineProxies
 				WindowStyle = ProcessWindowStyle.Hidden,
 				CreateNoWindow = true,
 				WorkingDirectory = root.ToEnvironmentalPath(),
-
 				RedirectStandardError = true,
 				RedirectStandardOutput = true
-			});
+			};
+
+			WriteGrey(root.ToEnvironmentalPath()+":"+bin + " " + rargs);
+
+			var proc = Process.Start(processStartInfo);
 
 			proc.WaitForExit();
 
@@ -42,10 +50,9 @@ namespace PlatformBuild.CmdLineProxies
 		{
 			lock (_writeLock)
 			{
-                var old = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Gray;
 				Console.WriteLine(str);
-                Console.ForegroundColor = old;
+                Console.ResetColor();
 			}
 		}
 
@@ -53,10 +60,9 @@ namespace PlatformBuild.CmdLineProxies
 		{
 			lock (_writeLock)
 			{
-                var old = Console.ForegroundColor;
                 Console.ForegroundColor = ConsoleColor.Red;
 				Console.WriteLine(str);
-                Console.ForegroundColor = old;
+                Console.ResetColor();
 			}
 		}
 

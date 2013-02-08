@@ -9,7 +9,7 @@ namespace PlatformBuild.CmdLineProxies
 		public void PullMaster(FilePath repoDir)
 		{
 			//repoDir.Call("git", "stash");
-			repoDir.Call("git", "pull origin master --no-progress");
+			repoDir.Call("git", "pull origin master -q");
 		}
 
 		public void Clone(FilePath repoDir, FilePath filePath, string repo)

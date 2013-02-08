@@ -107,15 +107,19 @@ namespace PlatformBuild
         {
 			foreach (var path in Modules.Paths)
 			{
-				var dbPath = _rootPath.Navigate((FilePath)(path+"/DatabaseScripts"));
+                var projPath = _rootPath.Navigate((FilePath)path);
+				var dbPath = projPath.Navigate((FilePath)"DatabaseScripts");
+				var sqlSpecificPath = dbPath.Navigate((FilePath)"SqlServer");
+
 				if (!_files.Exists(dbPath)) continue;
 				Console.WriteLine("Scripts from "+dbPath.ToEnvironmentalPath());
 
-				foreach (FilePath file in _files.SortedDescendants(dbPath, "*.sql"))
+                var finalSrcPath = (_files.Exists(sqlSpecificPath)) ? (sqlSpecificPath) : (dbPath);
+
+				foreach (FilePath file in _files.SortedDescendants(finalSrcPath, "*.sql"))
 				{
 					Console.WriteLine(file.LastElement());
-                    _builder.RunSqlScript(_rootPath, file);
-					//_rootPath.Call("_build/Sqlfk.exe", file.ToEnvironmentalPath());
+                    _builder.RunSqlScripts(projPath, file);
 				}
 			}
 		}

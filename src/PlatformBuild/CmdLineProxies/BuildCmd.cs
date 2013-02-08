@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace PlatformBuild.CmdLineProxies
 {
@@ -9,9 +10,20 @@ namespace PlatformBuild.CmdLineProxies
 			return buildPath.Call("Build.cmd", "");
 		}
 
-		public int RunSqlScript(FilePath root, FilePath script)
+		public int RunSqlScripts(FilePath root, FilePath script)
 		{
-			return root.Call("_build/Sqlfk.exe", script.ToEnvironmentalPath());
+            // todo: make this configurable:
+            var buildPath = root.Navigate((FilePath)"build");
+            var sqlInfo = buildPath.Navigate((FilePath)"sql.rule").ToEnvironmentalPath();
+
+            if (!File.Exists(sqlInfo))
+            {
+	            Console.WriteLine("*** Must have build/sql.rule file to get parallel sql ***");
+                return 0;
+            }
+
+			var sqlParams = File.ReadAllText(sqlInfo).Trim();
+			return buildPath.CallInFolder("sqlfk.exe", sqlParams + " -i \"" + script.ToEnvironmentalPath()+"\"");
 		}
 	}
 }

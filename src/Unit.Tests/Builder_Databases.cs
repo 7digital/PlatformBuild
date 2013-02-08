@@ -72,8 +72,9 @@ namespace Unit.Tests
         [Test]
         public void runs_all_found_scripts ()
         {
-			_buildCmd.Received(1).RunSqlScript(The.Root, (FilePath)"one");
-			_buildCmd.Received(1).RunSqlScript(The.Root, (FilePath)"two");
+            var projPath = The.Root.Navigate((FilePath)"group1/proj2");
+			_buildCmd.Received(1).RunSqlScripts(projPath, (FilePath)"one");
+			_buildCmd.Received(1).RunSqlScripts(projPath, (FilePath)"two");
         }
 	}
 }
