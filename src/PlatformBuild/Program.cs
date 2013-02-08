@@ -1,4 +1,5 @@
-﻿using PlatformBuild.CmdLineProxies;
+﻿using System;
+using PlatformBuild.CmdLineProxies;
 using PlatformBuild.DependencyManagement;
 using PlatformBuild.FileSystem;
 using PlatformBuild.LogOutput;
@@ -10,6 +11,8 @@ namespace PlatformBuild
 	{
 		static void Main(string[] args)
 		{
+            var start = DateTime.Now;
+
             if (args.Length > 0) Log.SetLevel(args[0]);
 
             var files = new RealFileSystem();
@@ -22,6 +25,10 @@ namespace PlatformBuild
 
 			thing.Prepare();
 			thing.RunBuild();
+
+            var end = DateTime.Now;
+
+			Console.WriteLine("Completed " + end + ", took " + (end - start));
 		}
 	}
 }

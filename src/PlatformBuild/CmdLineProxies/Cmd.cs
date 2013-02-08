@@ -12,15 +12,10 @@ namespace PlatformBuild.CmdLineProxies
 
 		public static int Call(this FilePath root, string exe, string args)
 		{
-			var isBatch = false;//exe.EndsWith(".cmd") || exe.EndsWith(".bat");
-
-			var bin = (isBatch) ? ("cmd") : (exe);
-			var rargs = (isBatch) ? ("/c " + exe + " " + args) : args;
-
 			var processStartInfo = new ProcessStartInfo
 			{
-				FileName = bin,
-				Arguments = rargs,
+				FileName = exe,
+				Arguments = args,
 				ErrorDialog = false,
 				UseShellExecute = false,
 				WindowStyle = ProcessWindowStyle.Hidden,
@@ -30,7 +25,7 @@ namespace PlatformBuild.CmdLineProxies
 				RedirectStandardOutput = true,
 			};
 
-			var callDescription = root.ToEnvironmentalPath() + ":" + bin + " " + rargs;
+			var callDescription = root.ToEnvironmentalPath() + ":" + exe + " " + args;
 			LogOutput.Log.Verbose(callDescription);
 
 			var proc = Process.Start(processStartInfo);
@@ -45,8 +40,10 @@ namespace PlatformBuild.CmdLineProxies
 			var errors = proc.StandardError.ReadToEnd();
             if (!string.IsNullOrWhiteSpace(errors)) LogOutput.Log.Error(proc.StandardError.ReadToEnd());
 
+            
             var messages = proc.StandardOutput.ReadToEnd();
-			if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(messages);
+			if (proc.ExitCode != 0) LogOutput.Log.Error(messages);
+			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(messages);
 
 			return proc.ExitCode;
 		}
