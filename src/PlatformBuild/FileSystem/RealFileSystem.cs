@@ -30,7 +30,9 @@ namespace PlatformBuild.FileSystem
 
 		public string[] Lines(FilePath path)
 		{
-			return File.ReadAllLines(path.ToEnvironmentalPath());
+			return 
+				File.ReadAllLines(path.ToEnvironmentalPath())
+				.Where(l => !l.StartsWith("#") && !string.IsNullOrWhiteSpace(l)).ToArray();
 		}
 
 

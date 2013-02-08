@@ -32,7 +32,7 @@ namespace PlatformBuild.Rules
 			for (int i = 0; i < Paths.Length; i++)
 			{
 				var path = Paths[i];
-				var buildRuleFile = BuildPath(rootPath, path);
+				var buildRuleFile = DependencyRulePath(rootPath, path);
 				if (!_files.Exists(buildRuleFile)) continue;
 
 				var lines = _files.Lines(buildRuleFile);
@@ -105,7 +105,7 @@ namespace PlatformBuild.Rules
 			return required.All(available.Contains);
 		}
 
-		FilePath BuildPath(FilePath filePath, string path)
+		static FilePath DependencyRulePath(FilePath filePath, string path)
 		{
 			return 
 				filePath.Navigate(

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -25,6 +26,7 @@ namespace PlatformBuild.DependencyManagement
 				if (name == null) continue;
 				if (!_available.ContainsKey(name)) continue;
 
+				Console.WriteLine(_available[name].FullName + " => " + target);
 				_available[name].CopyTo(target, true);
 			}
 		}

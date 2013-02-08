@@ -84,7 +84,7 @@ namespace PlatformBuild
 				var srcPath = _rootPath.Navigate((FilePath)(Modules.Paths[i] + "/src"));
 				_locks[i].WaitOne();
 
-				CopyDependencies(libPath);
+				CopyAvailableDependenciesToDirectory(libPath);
 
 				if (!_files.Exists(buildPath)) continue;
 
@@ -120,7 +120,7 @@ namespace PlatformBuild
 			}
 		}
 
-		void CopyDependencies(FilePath moduleLibPath)
+		void CopyAvailableDependenciesToDirectory(FilePath moduleLibPath)
 		{
 			var dest = _rootPath.Navigate(moduleLibPath);
 			_depMgr.CopyBuildResultsTo(dest);
