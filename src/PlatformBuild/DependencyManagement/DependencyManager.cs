@@ -38,7 +38,7 @@ namespace PlatformBuild.DependencyManagement
 					continue;
 				}
 
-				Log.Verbose(_available[name].FullName + " => " + target);
+				Log.Verbose(source.FullName + " => " + target);
 				source.CopyTo(target, true);
 			}
 		}

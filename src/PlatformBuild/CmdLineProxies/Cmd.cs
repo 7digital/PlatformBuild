@@ -12,7 +12,7 @@ namespace PlatformBuild.CmdLineProxies
 
 		public static int Call(this FilePath root, string exe, string args)
 		{
-			var isBatch = exe.EndsWith(".cmd") || exe.EndsWith(".bat");
+			var isBatch = false;//exe.EndsWith(".cmd") || exe.EndsWith(".bat");
 
 			var bin = (isBatch) ? ("cmd") : (exe);
 			var rargs = (isBatch) ? ("/c " + exe + " " + args) : args;
