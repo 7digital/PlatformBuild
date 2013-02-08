@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Builder_Pulling.cs" />
     <Compile Include="Builder_BuildProjects.cs" />
+    <Compile Include="Builder_Databases.cs" />
     <Compile Include="The.cs" />
     <Compile Include="DependencyOrderTests.cs" />
     <Compile Include="Builder_WhenPreparing.cs" />

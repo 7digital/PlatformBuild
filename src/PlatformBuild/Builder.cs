@@ -105,15 +105,17 @@ namespace PlatformBuild
 
         public void RebuildDatabases()
         {
-
 			foreach (var path in Modules.Paths)
 			{
-				var dbPath = new FilePath(path + "/DatabaseScripts");
+				var dbPath = _rootPath.Navigate((FilePath)(path+"/DatabaseScripts"));
 				if (!_files.Exists(dbPath)) continue;
+				Console.WriteLine("Scripts from "+dbPath.ToEnvironmentalPath());
 
 				foreach (FilePath file in _files.SortedDescendants(dbPath, "*.sql"))
 				{
-					_rootPath.Call("_build/Sqlfk.exe", file.ToEnvironmentalPath());
+					Console.WriteLine(file.LastElement());
+                    _builder.RunSqlScript(_rootPath, file);
+					//_rootPath.Call("_build/Sqlfk.exe", file.ToEnvironmentalPath());
 				}
 			}
 		}

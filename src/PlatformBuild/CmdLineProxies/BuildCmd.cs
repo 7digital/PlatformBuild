@@ -8,5 +8,10 @@ namespace PlatformBuild.CmdLineProxies
 		{
 			return buildPath.Call("Build.cmd", "");
 		}
+
+		public int RunSqlScript(FilePath root, FilePath script)
+		{
+			return root.Call("_build/Sqlfk.exe", script.ToEnvironmentalPath());
+		}
 	}
 }

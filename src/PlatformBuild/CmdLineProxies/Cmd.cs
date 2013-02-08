@@ -14,7 +14,7 @@ namespace PlatformBuild.CmdLineProxies
 
 			var bin = (isBatch) ? ("cmd") : (exe);
 			var rargs = (isBatch) ? ("/c " + exe + " " + args) : args;
-			Console.WriteLine(root.Navigate((FilePath)exe).ToEnvironmentalPath() + " " + args);
+			//Console.WriteLine(root.Navigate((FilePath)exe).ToEnvironmentalPath() + " " + args);
 			var proc = Process.Start(new ProcessStartInfo
 			{
 				FileName = bin,
@@ -31,6 +31,7 @@ namespace PlatformBuild.CmdLineProxies
 
 			proc.WaitForExit();
 
+            // TODO: read before exit?
 			WriteRed(proc.StandardError.ReadToEnd());
 			WriteGrey(proc.StandardOutput.ReadToEnd());
 
