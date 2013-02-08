@@ -27,18 +27,26 @@ namespace PlatformBuild.CmdLineProxies
 				CreateNoWindow = true,
 				WorkingDirectory = root.ToEnvironmentalPath(),
 				RedirectStandardError = true,
-				RedirectStandardOutput = true
+				RedirectStandardOutput = true,
 			};
 
-			LogOutput.Log.Verbose(root.ToEnvironmentalPath()+":"+bin + " " + rargs);
+			var callDescription = root.ToEnvironmentalPath() + ":" + bin + " " + rargs;
+			LogOutput.Log.Verbose(callDescription);
 
 			var proc = Process.Start(processStartInfo);
 
-			proc.WaitForExit();
+			if (!proc.WaitForExit(10000))
+			{
+				LogOutput.Log.Error("Call taking a long time: " + callDescription);
+				proc.WaitForExit(10000);
+				LogOutput.Log.Error("ABORTING LONG CALL " + callDescription);
+			}
 
-            // TODO: read before exit?
-			LogOutput.Log.Error(proc.StandardError.ReadToEnd());
-			LogOutput.Log.Info(proc.StandardOutput.ReadToEnd());
+			var errors = proc.StandardError.ReadToEnd();
+            if (!string.IsNullOrWhiteSpace(errors)) LogOutput.Log.Error(proc.StandardError.ReadToEnd());
+
+            var messages = proc.StandardOutput.ReadToEnd();
+			if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(messages);
 
 			return proc.ExitCode;
 		}

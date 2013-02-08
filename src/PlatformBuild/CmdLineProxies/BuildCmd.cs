@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using PlatformBuild.LogOutput;
 
 namespace PlatformBuild.CmdLineProxies
@@ -8,7 +7,7 @@ namespace PlatformBuild.CmdLineProxies
 	{
 		public int Build(FilePath buildPath)
 		{
-			return buildPath.Call("Build.cmd", "");
+			return buildPath.CallInFolder("Build.cmd", "");
 		}
 
 		public int RunSqlScripts(FilePath root, FilePath script)
@@ -19,7 +18,7 @@ namespace PlatformBuild.CmdLineProxies
 
             if (!File.Exists(sqlInfo))
             {
-	            Log.Status("*** Must have build/sql.rule file to get parallel sql ***");
+	            Log.Verbose("*** Must have build/sql.rule file to get parallel sql ***");
                 return 0;
             }
 

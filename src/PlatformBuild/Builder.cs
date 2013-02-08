@@ -54,11 +54,13 @@ namespace PlatformBuild
 			var databases = new Thread(RebuildDatabases);
 
 			pulling.Start();
-			building.Start();
 			databases.Start();
+			building.Start();
 
-            databases.Join();
 			building.Join();
+            Log.Verbose("All builds finished");
+            databases.Join();
+            Log.Verbose("All databases updated");
 		}
 
 		public void PullRepos()
@@ -68,11 +70,10 @@ namespace PlatformBuild
 				var modulePath = _rootPath.Navigate((FilePath)Modules.Paths[i]);
 				var libPath = modulePath.Navigate((FilePath)"lib");
 
-				var waitLock = _locks[i];
-				
-				if (_files.Exists(libPath)) _git.Reset(modulePath);
+				if (_files.Exists(libPath)) _git.Reset(libPath);
 				_git.PullCurrentBranch(modulePath);
-				waitLock.Set();
+                Log.Status("Updated "+Modules.Paths[i]);
+				_locks[i].Set();
 			}
 		}
 
@@ -80,19 +81,35 @@ namespace PlatformBuild
 		{
 			for (int i = 0; i < Modules.Paths.Length; i++)
 			{
-				var buildPath = _rootPath.Navigate((FilePath)(Modules.Paths[i] + "/build"));
-				var libPath = _rootPath.Navigate((FilePath)(Modules.Paths[i] + "/lib"));
-				var srcPath = _rootPath.Navigate((FilePath)(Modules.Paths[i] + "/src"));
-				_locks[i].WaitOne();
+				var moduleName = Modules.Paths[i];
+				var buildPath = _rootPath.Navigate((FilePath)(moduleName + "/build"));
+				var libPath = _rootPath.Navigate((FilePath)(moduleName + "/lib"));
+				var srcPath = _rootPath.Navigate((FilePath)(moduleName + "/src"));
+
+				if (!_locks[i].WaitOne(TimeSpan.FromSeconds(1)))
+				{
+					Log.Status("Waiting for git update of " + moduleName);
+					if (!_locks[i].WaitOne(TimeSpan.FromSeconds(30)))
+					{
+                        Log.Error("Waiting a long time for "+moduleName+" to update!");
+                        _locks[i].WaitOne();
+					}
+				}
 
 				CopyAvailableDependenciesToDirectory(libPath);
 
-				if (!_files.Exists(buildPath)) continue;
+				if (!_files.Exists(buildPath))
+				{
+                    Log.Info("Ignoring "+moduleName+" because it has no build folder");
+					continue;
+				}
 
+				Log.Status("Starting build of " + moduleName);
 				try
 				{
 					int code = _builder.Build(buildPath);
-					if (code != 0) Log.Error("Build error!");
+					if (code != 0) Log.Error("Build failed: "+moduleName);
+                    else Log.Status("Build complete: "+moduleName);
 					// todo : handle errors!
 				}
 				catch (Exception ex)
