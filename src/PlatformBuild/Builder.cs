@@ -5,6 +5,7 @@ using System.Threading;
 using PlatformBuild.CmdLineProxies;
 using PlatformBuild.DependencyManagement;
 using PlatformBuild.FileSystem;
+using PlatformBuild.LogOutput;
 using PlatformBuild.Rules;
 
 namespace PlatformBuild
@@ -32,7 +33,7 @@ namespace PlatformBuild
 		public void Prepare()
 		{
 			_rootPath = _files.GetPlatformRoot();
-			Console.WriteLine("Started in "+_rootPath.ToEnvironmentalPath()+"; Updating self");
+			Log.Info("Started in "+_rootPath.ToEnvironmentalPath()+"; Updating self");
 
 			_git.PullMaster(_rootPath);
 
@@ -40,7 +41,7 @@ namespace PlatformBuild
 			Modules.ReadDependencies(_rootPath);
 			Modules.SortInDependencyOrder();
 
-			Console.WriteLine("Processing " + string.Join(", ", Modules.Paths));
+			Log.Verbose("Processing " + string.Join(", ", Modules.Paths));
 			CloneMissingRepos();
 
 			_locks = Modules.CreateAndSetLocks();
@@ -91,12 +92,12 @@ namespace PlatformBuild
 				try
 				{
 					int code = _builder.Build(buildPath);
-					if (code != 0) Console.WriteLine("Build error!");
+					if (code != 0) Log.Error("Build error!");
 					// todo : handle errors!
 				}
 				catch (Exception ex)
 				{
-					Cmd.Error(ex);
+					Log.Error("Build error: " + ex.GetType() + ": " + ex.Message);
 				}
 
 				_depMgr.UpdateAvailableDependencies(srcPath);
@@ -112,13 +113,13 @@ namespace PlatformBuild
 				var sqlSpecificPath = dbPath.Navigate((FilePath)"SqlServer");
 
 				if (!_files.Exists(dbPath)) continue;
-				Console.WriteLine("Scripts from "+dbPath.ToEnvironmentalPath());
+				Log.Info("Scripts from "+dbPath.ToEnvironmentalPath());
 
                 var finalSrcPath = (_files.Exists(sqlSpecificPath)) ? (sqlSpecificPath) : (dbPath);
 
 				foreach (FilePath file in _files.SortedDescendants(finalSrcPath, "*.sql"))
 				{
-					Console.WriteLine(file.LastElement());
+					Log.Verbose(file.LastElement());
                     _builder.RunSqlScripts(projPath, file);
 				}
 			}
@@ -138,7 +139,7 @@ namespace PlatformBuild
 				var expected = _rootPath.Navigate(path);
 				if (_files.Exists(expected)) continue;
 
-				Console.WriteLine(path.ToEnvironmentalPath() + " is missing. Cloning...");
+				Log.Info(path.ToEnvironmentalPath() + " is missing. Cloning...");
 				_git.Clone(_rootPath, expected, Modules.Repos[i]);
 			}
 		}

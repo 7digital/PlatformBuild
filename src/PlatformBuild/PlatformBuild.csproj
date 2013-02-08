@@ -46,7 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CmdLineProxies\BuildCmd.cs" />
-    <Compile Include="Crap\ArrayExtensions.cs" />
+    <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Builder.cs" />
     <Compile Include="DependencyManagement\DependencyManager.cs" />
     <Compile Include="FileSystem\IFileSystem.cs" />
@@ -55,6 +55,7 @@
     <Compile Include="CmdLineProxies\IGit.cs" />
     <Compile Include="DependencyManagement\IDependencyManager.cs" />
     <Compile Include="CmdLineProxies\IBuildCmd.cs" />
+    <Compile Include="LogOutput\Log.cs" />
     <Compile Include="Rules\IModules.cs" />
     <Compile Include="Rules\IRuleFactory.cs" />
     <Compile Include="Rules\Modules.cs" />

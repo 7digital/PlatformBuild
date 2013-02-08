@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using PlatformBuild.Crap;
 using PlatformBuild.FileSystem;
+using PlatformBuild.LogOutput;
 
 namespace PlatformBuild.Rules
 {
@@ -101,7 +102,7 @@ namespace PlatformBuild.Rules
 			var depNames = Deps[idx].Select(i=>Paths[i]).ToArray();
 
 
-			//Console.WriteLine(selfName + " <-- " + string.Join(", ", depNames));
+			Log.Verbose(selfName + " <-- " + string.Join(", ", depNames));
             return depNames.Contains(selfName);
 		}
 
@@ -133,7 +134,7 @@ namespace PlatformBuild.Rules
 
 		void ReadModules(FilePath filePath)
 		{
-			//Console.WriteLine("Reading "+filePath.ToEnvironmentalPath());
+			Log.Verbose("Reading "+filePath.ToEnvironmentalPath());
 			var lines = _files.Lines(filePath);
 
 			var c = lines.Length;
@@ -145,7 +146,7 @@ namespace PlatformBuild.Rules
 
 			for (int i = 0; i < c; i++)
 			{
-				//Console.WriteLine(lines[i]);
+				Log.Verbose(lines[i]);
 				var bits = lines[i].Split('=').Select(s => s.Trim()).ToArray();
 
 				Repos[i] = bits[1];

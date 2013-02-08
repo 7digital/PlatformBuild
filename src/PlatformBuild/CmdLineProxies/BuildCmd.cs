@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using PlatformBuild.LogOutput;
 
 namespace PlatformBuild.CmdLineProxies
 {
@@ -18,7 +19,7 @@ namespace PlatformBuild.CmdLineProxies
 
             if (!File.Exists(sqlInfo))
             {
-	            Console.WriteLine("*** Must have build/sql.rule file to get parallel sql ***");
+	            Log.Status("*** Must have build/sql.rule file to get parallel sql ***");
                 return 0;
             }
 

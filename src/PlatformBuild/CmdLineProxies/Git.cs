@@ -25,7 +25,7 @@ namespace PlatformBuild.CmdLineProxies
 		public void PullCurrentBranch(FilePath modulePath)
 		{
 			//modulePath.Call("git", "stash");
-			for (int i = 0; i < _retries; i++) if (modulePath.Call("git", "pull origin --progress") == 0) break;
+			for (int i = 0; i < _retries; i++) if (modulePath.Call("git", "pull origin -q") == 0) break;
 			
             //if (modulePath.Call("git", "stash pop") != 0)
 				//throw new Exception("Possible merge conflicts in " + modulePath.ToEnvironmentalPath());

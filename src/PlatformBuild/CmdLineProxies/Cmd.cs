@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -6,8 +5,6 @@ namespace PlatformBuild.CmdLineProxies
 {
 	public static class Cmd
 	{
-        static readonly object _writeLock = new Object();
-
         public static int CallInFolder(this FilePath root, string exe, string args)
         {
             return Call(root, root.Navigate((FilePath)exe).ToEnvironmentalPath(), args);
@@ -33,42 +30,17 @@ namespace PlatformBuild.CmdLineProxies
 				RedirectStandardOutput = true
 			};
 
-			WriteGrey(root.ToEnvironmentalPath()+":"+bin + " " + rargs);
+			LogOutput.Log.Verbose(root.ToEnvironmentalPath()+":"+bin + " " + rargs);
 
 			var proc = Process.Start(processStartInfo);
 
 			proc.WaitForExit();
 
             // TODO: read before exit?
-			WriteRed(proc.StandardError.ReadToEnd());
-			WriteGrey(proc.StandardOutput.ReadToEnd());
+			LogOutput.Log.Error(proc.StandardError.ReadToEnd());
+			LogOutput.Log.Info(proc.StandardOutput.ReadToEnd());
 
 			return proc.ExitCode;
-		}
-
-		static void WriteGrey(string str)
-		{
-			lock (_writeLock)
-			{
-                Console.ForegroundColor = ConsoleColor.Gray;
-				Console.WriteLine(str);
-                Console.ResetColor();
-			}
-		}
-
-		static void WriteRed(string str)
-		{
-			lock (_writeLock)
-			{
-                Console.ForegroundColor = ConsoleColor.Red;
-				Console.WriteLine(str);
-                Console.ResetColor();
-			}
-		}
-
-		public static void Error(Exception exception)
-		{
-			WriteRed(exception.GetType() + ": " + exception.Message);
 		}
 	}
 }
