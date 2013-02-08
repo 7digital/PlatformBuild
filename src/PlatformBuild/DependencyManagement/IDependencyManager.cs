@@ -6,5 +6,6 @@ namespace PlatformBuild.DependencyManagement
 	{
 		void CopyBuildResultsTo(FilePath dest);
 		void UpdateAvailableDependencies(FilePath srcPath);
+		void ReadMasters(FilePath rootPath, FilePath[] masters);
 	}
 }

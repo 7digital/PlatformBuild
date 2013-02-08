@@ -20,6 +20,7 @@ namespace PlatformBuild
 		FilePath _rootPath;
 		public IModules Modules { get; private set; }
 		IList<AutoResetEvent> _locks;
+		IPatterns _patterns;
 
 		public Builder(IFileSystem files, IGit git, IDependencyManager depMgr, IRuleFactory rules, IBuildCmd builder)
 		{
@@ -33,13 +34,16 @@ namespace PlatformBuild
 		public void Prepare()
 		{
 			_rootPath = _files.GetPlatformRoot();
-			Log.Info("Started in "+_rootPath.ToEnvironmentalPath()+"; Updating self");
+			Log.Info("Started in " + _rootPath.ToEnvironmentalPath() + "; Updating self");
 
 			_git.PullMaster(_rootPath);
 
-            Modules = _rules.GetModules();
+			_patterns = _rules.GetRulePatterns();
+			Modules = _rules.GetModules();
 			Modules.ReadDependencies(_rootPath);
 			Modules.SortInDependencyOrder();
+
+            _depMgr.ReadMasters(_rootPath, _patterns.Masters);
 
 			Log.Verbose("Processing " + string.Join(", ", Modules.Paths));
 			CloneMissingRepos();
@@ -58,9 +62,9 @@ namespace PlatformBuild
 			building.Start();
 
 			building.Join();
-            Log.Verbose("All builds finished");
-            databases.Join();
-            Log.Verbose("All databases updated");
+			Log.Verbose("All builds finished");
+			databases.Join();
+			Log.Verbose("All databases updated");
 		}
 
 		public void PullRepos()
@@ -72,7 +76,7 @@ namespace PlatformBuild
 
 				if (_files.Exists(libPath)) _git.Reset(libPath);
 				_git.PullCurrentBranch(modulePath);
-                Log.Status("Updated "+Modules.Paths[i]);
+				Log.Status("Updated " + Modules.Paths[i]);
 				_locks[i].Set();
 			}
 		}
@@ -83,7 +87,7 @@ namespace PlatformBuild
 			{
 				var moduleName = Modules.Paths[i];
 				var buildPath = _rootPath.Navigate((FilePath)(moduleName + "/build"));
-				var libPath = _rootPath.Navigate((FilePath)(moduleName + "/lib"));
+				var libPath = _rootPath.Navigate((FilePath)(moduleName)).Navigate(_patterns.DependencyPath);
 				var srcPath = _rootPath.Navigate((FilePath)(moduleName + "/src"));
 
 				if (!_locks[i].WaitOne(TimeSpan.FromSeconds(1)))
@@ -91,8 +95,8 @@ namespace PlatformBuild
 					Log.Status("Waiting for git update of " + moduleName);
 					if (!_locks[i].WaitOne(TimeSpan.FromSeconds(30)))
 					{
-                        Log.Error("Waiting a long time for "+moduleName+" to update!");
-                        _locks[i].WaitOne();
+						Log.Error("Waiting a long time for " + moduleName + " to update!");
+						_locks[i].WaitOne();
 					}
 				}
 
@@ -100,7 +104,7 @@ namespace PlatformBuild
 
 				if (!_files.Exists(buildPath))
 				{
-                    Log.Info("Ignoring "+moduleName+" because it has no build folder");
+					Log.Info("Ignoring " + moduleName + " because it has no build folder");
 					continue;
 				}
 
@@ -108,8 +112,8 @@ namespace PlatformBuild
 				try
 				{
 					int code = _builder.Build(buildPath);
-					if (code != 0) Log.Error("Build failed: "+moduleName);
-                    else Log.Status("Build complete: "+moduleName);
+					if (code != 0) Log.Error("Build failed: " + moduleName);
+					else Log.Status("Build complete: " + moduleName);
 					// todo : handle errors!
 				}
 				catch (Exception ex)
@@ -121,23 +125,23 @@ namespace PlatformBuild
 			}
 		}
 
-        public void RebuildDatabases()
-        {
+		public void RebuildDatabases()
+		{
 			foreach (var path in Modules.Paths)
 			{
-                var projPath = _rootPath.Navigate((FilePath)path);
+				var projPath = _rootPath.Navigate((FilePath)path);
 				var dbPath = projPath.Navigate((FilePath)"DatabaseScripts");
 				var sqlSpecificPath = dbPath.Navigate((FilePath)"SqlServer");
 
 				if (!_files.Exists(dbPath)) continue;
-				Log.Info("Scripts from "+dbPath.ToEnvironmentalPath());
+				Log.Info("Scripts from " + dbPath.ToEnvironmentalPath());
 
-                var finalSrcPath = (_files.Exists(sqlSpecificPath)) ? (sqlSpecificPath) : (dbPath);
+				var finalSrcPath = (_files.Exists(sqlSpecificPath)) ? (sqlSpecificPath) : (dbPath);
 
 				foreach (FilePath file in _files.SortedDescendants(finalSrcPath, "*.sql"))
 				{
 					Log.Verbose(file.LastElement());
-                    _builder.RunSqlScripts(projPath, file);
+					_builder.RunSqlScripts(projPath, file);
 				}
 			}
 		}
@@ -150,7 +154,7 @@ namespace PlatformBuild
 
 		void CloneMissingRepos()
 		{
-			for (int i= 0; i < Modules.Paths.Length; i++)
+			for (int i = 0; i < Modules.Paths.Length; i++)
 			{
 				var path = new FilePath(Modules.Paths[i]);
 				var expected = _rootPath.Navigate(path);

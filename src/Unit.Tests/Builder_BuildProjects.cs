@@ -27,6 +27,7 @@ namespace Unit.Tests
 		IModules _modules;
 		IList<AutoResetEvent> _locks;
 		IBuildCmd _buildCmd;
+		IPatterns _patterns;
 
 		[SetUp]
 		public void builder()
@@ -43,10 +44,17 @@ namespace Unit.Tests
 			_locks = new List<AutoResetEvent> { new AutoResetEvent(true), new AutoResetEvent(true), new AutoResetEvent(true) };
 			_modules.CreateAndSetLocks().Returns(_locks);
 
+            _patterns = new Patterns {
+                DependencyPattern = "*.dll",
+                DependencyPath = (FilePath)"lib",
+                Masters = new FilePath[]{}
+			};
+
 			_git = Substitute.For<IGit>();
 			_depMgr = Substitute.For<IDependencyManager>();
 			_ruleFac = Substitute.For<IRuleFactory>();
 			_ruleFac.GetModules().Returns(_modules);
+            _ruleFac.GetRulePatterns().Returns(_patterns);
 
 			_buildCmd = Substitute.For<IBuildCmd>();
 

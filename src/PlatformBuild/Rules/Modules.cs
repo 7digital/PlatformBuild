@@ -13,14 +13,16 @@ namespace PlatformBuild.Rules
 	{
 		readonly FilePath _moduleRulePath;
 		readonly IFileSystem _files;
+		readonly IPatterns _patterns;
 		public string[] Repos { get; set; }
 		public string[] Paths { get; set; }
 		public List<int>[] Deps { get; set; }
 
-		public Modules(FilePath moduleRulePath, IFileSystem files)
+		public Modules(FilePath moduleRulePath, IFileSystem files, IPatterns patterns)
 		{
 			_moduleRulePath = moduleRulePath;
 			_files = files;
+			_patterns = patterns;
 		}
 
 		/// <summary> (1)
@@ -124,12 +126,9 @@ namespace PlatformBuild.Rules
 			return required.All(available.Contains);
 		}
 
-		static FilePath DependencyRulePath(FilePath filePath, string path)
+		FilePath DependencyRulePath(FilePath filePath, string path)
 		{
-			return 
-				filePath.Navigate(
-				new FilePath(path+"/lib/Depends.rule"))
-				;
+			return filePath.Navigate(_patterns.DependencyPath).Navigate((FilePath)"Depends.rule");
 		}
 
 		void ReadModules(FilePath filePath)

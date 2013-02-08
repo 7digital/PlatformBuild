@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using NUnit.Framework;
-using PlatformBuild;
 using PlatformBuild.Rules;
 
 namespace Unit.Tests
@@ -17,7 +12,7 @@ namespace Unit.Tests
 		[SetUp]
 		public void setup()
 		{
-			_subject = new Modules(null, null);
+			_subject = new Modules(null, null, null);
 			_subject.Repos = new []{"g_4", "g_5", "g_1", "g_3", "g_2", "g_6"};
 			_subject.Paths = new []{
 				"four",//0

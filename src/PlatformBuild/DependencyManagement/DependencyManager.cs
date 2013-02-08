@@ -1,33 +1,45 @@
 using System.Collections.Generic;
 using System.IO;
+using PlatformBuild.Crap;
 using PlatformBuild.LogOutput;
+using PlatformBuild.Rules;
 
 namespace PlatformBuild.DependencyManagement
 {
 	public class DependencyManager : IDependencyManager
 	{
-		readonly string _matchingPattern;
+		readonly IPatterns _patterns;
 		readonly Dictionary<string, FileInfo> _available;
+        readonly Dictionary<string, FileInfo> _masters;
 
-		public DependencyManager(string matchingPattern)
+		public DependencyManager(IPatterns patterns)
 		{
-			_matchingPattern = matchingPattern;
+			_patterns = patterns;
 			_available = new Dictionary<string, FileInfo>(); // name => info
+			_masters = new Dictionary<string, FileInfo>(); // name => info
 		}
 
 		public void CopyBuildResultsTo(FilePath dest)
 		{
 			// For every file in dest, if we have a newer copy then overwrite dest file.
+            // masters always override other available files
 			if (!Directory.Exists(dest.ToEnvironmentalPath())) return;
-            var files = Directory.GetFiles(dest.ToEnvironmentalPath(), _matchingPattern, SearchOption.TopDirectoryOnly);
+            var files = Directory.GetFiles(dest.ToEnvironmentalPath(), _patterns.DependencyPattern, SearchOption.TopDirectoryOnly);
 			foreach (var target in files)
 			{
 				var name = Path.GetFileName(target);
 				if (name == null) continue;
-				if (!_available.ContainsKey(name)) continue;
+
+                var source = _masters.Of(name) ?? _available.Of(name);
+
+				if (source == null)
+				{
+				    Log.Verbose("No source for => " + target);
+					continue;
+				}
 
 				Log.Verbose(_available[name].FullName + " => " + target);
-				_available[name].CopyTo(target, true);
+				source.CopyTo(target, true);
 			}
 		}
 
@@ -35,21 +47,37 @@ namespace PlatformBuild.DependencyManagement
 		{
 			if (!Directory.Exists(srcPath.ToEnvironmentalPath())) return;
 			// for every pattern file under srcPath, add to list if it's the newest
-			var files = Directory.GetFiles(srcPath.ToEnvironmentalPath(), _matchingPattern, SearchOption.AllDirectories);
+			SetByLatest(srcPath, _available, _patterns.DependencyPattern);
+		}
+
+		static void SetByLatest(FilePath srcPath, IDictionary<string, FileInfo> repo, string pattern)
+		{
+			var files = Directory.GetFiles(srcPath.ToEnvironmentalPath(), pattern, SearchOption.AllDirectories);
 			foreach (var file in files)
 			{
-                var name = Path.GetFileName(file);
-                if (name == null) continue;
-                var newInfo = new FileInfo(file);
-				if (!_available.ContainsKey(name))
+				var name = Path.GetFileName(file);
+				if (name == null) continue;
+				var newInfo = new FileInfo(file);
+				if (!repo.ContainsKey(name))
 				{
-                    _available.Add(name,newInfo);
-                    continue;
+					repo.Add(name, newInfo);
+					continue;
 				}
 
-                var existing = _available[name];
-                if (newInfo.LastWriteTime > existing.LastWriteTime)
-                    _available[name] = newInfo;
+				var existing = repo[name];
+				if (newInfo.LastWriteTime > existing.LastWriteTime)
+					repo[name] = newInfo;
+			}
+		}
+
+		public void ReadMasters(FilePath rootPath, FilePath[] masters)
+		{
+			foreach (var master in masters)
+			{
+				var fullPath = rootPath.Navigate(master);
+			    if (!Directory.Exists(fullPath.ToEnvironmentalPath())) continue;
+
+				SetByLatest(fullPath, _masters, "*");
 			}
 		}
 	}
