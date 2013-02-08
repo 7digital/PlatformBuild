@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using PlatformBuild;
+using PlatformBuild.CmdLineProxies;
 using PlatformBuild.DependencyManagement;
 using PlatformBuild.FileSystem;
-using PlatformBuild.GitVCS;
 using PlatformBuild.Rules;
 
 namespace Unit.Tests
@@ -54,17 +54,17 @@ namespace Unit.Tests
 		[Test]
 		public void resets_all_lib_folders()
 		{
-			_git.Received(1).ResetLib(new FilePath("group1/proj1"));
-			_git.Received(1).ResetLib(new FilePath("group1/proj2"));
-			_git.Received(1).ResetLib(new FilePath("group2/proj3"));
+			_git.Received(1).Reset(The.Root.Navigate((FilePath)"group1/proj1"));
+			_git.Received(1).Reset(The.Root.Navigate((FilePath)"group1/proj2"));
+			_git.Received(1).Reset(The.Root.Navigate((FilePath)"group2/proj3"));
 		}
 
 		[Test]
 		public void pulls_changes ()
 		{
-			_git.Received(1).PullCurrentBranch(new FilePath("group1/proj1"));
-			_git.Received(1).PullCurrentBranch(new FilePath("group1/proj2"));
-			_git.Received(1).PullCurrentBranch(new FilePath("group2/proj3"));
+			_git.Received(1).PullCurrentBranch(The.Root.Navigate((FilePath)"group1/proj1"));
+			_git.Received(1).PullCurrentBranch(The.Root.Navigate((FilePath)"group1/proj2"));
+			_git.Received(1).PullCurrentBranch(The.Root.Navigate((FilePath)"group2/proj3"));
 		}
 
 		[Test]

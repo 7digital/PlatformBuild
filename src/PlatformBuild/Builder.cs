@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using PlatformBuild.CmdLineProxies;
 using PlatformBuild.DependencyManagement;
 using PlatformBuild.FileSystem;
-using PlatformBuild.GitVCS;
 using PlatformBuild.Rules;
 
 namespace PlatformBuild
@@ -32,14 +32,17 @@ namespace PlatformBuild
 		public void Prepare()
 		{
 			_rootPath = _files.GetPlatformRoot();
+			Console.WriteLine("Started in "+_rootPath.ToEnvironmentalPath()+"; Updating self");
 
 			_git.PullMaster(_rootPath);
 
             Modules = _rules.GetModules();
-			CloneMissingRepos();
-
 			Modules.ReadDependencies(_rootPath);
 			Modules.SortInDependencyOrder();
+
+			Console.WriteLine("Processing " + string.Join(", ", Modules.Paths));
+			CloneMissingRepos();
+
 			_locks = Modules.CreateAndSetLocks();
 		}
 
@@ -61,9 +64,12 @@ namespace PlatformBuild
 		{
 			for (int i = 0; i < Modules.Paths.Length; i++)
 			{
-				var modulePath = new FilePath(Modules.Paths[i]);
+				var modulePath = _rootPath.Navigate((FilePath)Modules.Paths[i]);
+				var libPath = modulePath.Navigate((FilePath)"lib");
+
 				var waitLock = _locks[i];
-				_git.ResetLib(modulePath);
+				
+				if (_files.Exists(libPath)) _git.Reset(modulePath);
 				_git.PullCurrentBranch(modulePath);
 				waitLock.Set();
 			}
@@ -82,9 +88,16 @@ namespace PlatformBuild
 
 				if (!_files.Exists(buildPath)) continue;
 
-				int code = _builder.Build(buildPath);
-				if (code != 0) Console.WriteLine("Build error!");
-				// todo : handle errors!
+				try
+				{
+					int code = _builder.Build(buildPath);
+					if (code != 0) Console.WriteLine("Build error!");
+					// todo : handle errors!
+				}
+				catch (Exception ex)
+				{
+					Cmd.Error(ex);
+				}
 
 				_depMgr.UpdateAvailableDependencies(srcPath);
 			}
@@ -115,10 +128,11 @@ namespace PlatformBuild
 		{
 			for (int i= 0; i < Modules.Paths.Length; i++)
 			{
-				var path = Modules.Paths[i];
-				var expected = _rootPath.Navigate(new FilePath(path));
+				var path = new FilePath(Modules.Paths[i]);
+				var expected = _rootPath.Navigate(path);
 				if (_files.Exists(expected)) continue;
 
+				Console.WriteLine(path.ToEnvironmentalPath() + " is missing. Cloning...");
 				_git.Clone(_rootPath, expected, Modules.Repos[i]);
 			}
 		}

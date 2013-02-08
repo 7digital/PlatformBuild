@@ -1,16 +1,15 @@
-using System;
 using System.IO;
 
-namespace PlatformBuild.GitVCS
+namespace PlatformBuild.CmdLineProxies
 {
 	public class Git : IGit
 	{
-		int _retries = 2;
+		const int _retries = 2;
 
 		public void PullMaster(FilePath repoDir)
 		{
-			repoDir.Call("git", "stash");
-			repoDir.Call("git", "pull origin master");
+			//repoDir.Call("git", "stash");
+			repoDir.Call("git", "pull origin master --progress");
 		}
 
 		public void Clone(FilePath repoDir, FilePath filePath, string repo)
@@ -18,19 +17,18 @@ namespace PlatformBuild.GitVCS
 			repoDir.Call("git", "clone "+repo+" "+filePath.Unroot(repoDir).ToPosixPath());
 		}
 
-		public void ResetLib(FilePath modulePath)
+		public void Reset(FilePath path)
 		{
-			var path = modulePath.Navigate(new FilePath("lib"));
 			path.Call("git", "reset --hard HEAD");
 		}
 
 		public void PullCurrentBranch(FilePath modulePath)
 		{
-            modulePath.Call("git", "stash");
-			for (int i = 0; i < _retries; i++) if (modulePath.Call("git", "pull origin") == 0) break;
+			//modulePath.Call("git", "stash");
+			for (int i = 0; i < _retries; i++) if (modulePath.Call("git", "pull origin --progress") == 0) break;
 			
-            if (modulePath.Call("git", "stash pop") != 0)
-				throw new Exception("Possible merge conflicts in " + modulePath.ToEnvironmentalPath());
+            //if (modulePath.Call("git", "stash pop") != 0)
+				//throw new Exception("Possible merge conflicts in " + modulePath.ToEnvironmentalPath());
 		}
 	}
 }

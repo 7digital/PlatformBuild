@@ -1,6 +1,6 @@
-﻿using PlatformBuild.DependencyManagement;
+﻿using PlatformBuild.CmdLineProxies;
+using PlatformBuild.DependencyManagement;
 using PlatformBuild.FileSystem;
-using PlatformBuild.GitVCS;
 using PlatformBuild.Rules;
 
 namespace PlatformBuild

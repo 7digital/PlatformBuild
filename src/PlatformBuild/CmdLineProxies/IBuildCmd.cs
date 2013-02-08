@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace PlatformBuild
+namespace PlatformBuild.CmdLineProxies
 {
 	public interface IBuildCmd
 	{

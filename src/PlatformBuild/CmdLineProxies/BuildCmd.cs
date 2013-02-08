@@ -1,7 +1,6 @@
 ﻿using System.IO;
-using PlatformBuild.GitVCS;
 
-namespace PlatformBuild
+namespace PlatformBuild.CmdLineProxies
 {
 	public class BuildCmd : IBuildCmd
 	{

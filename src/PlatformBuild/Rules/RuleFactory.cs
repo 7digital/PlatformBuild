@@ -22,7 +22,7 @@ namespace PlatformBuild.Rules
 		public IModules GetModules()
 		{
 			var rulesFile = _rootDirectory.Navigate(_modulesPath);
-			return  new Modules(rulesFile, _files);
+			return new Modules(rulesFile, _files);
 		}
 	}
 }

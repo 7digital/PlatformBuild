@@ -19,7 +19,7 @@ namespace PlatformBuild.FileSystem
                 here = next;
             }
 
-			return new FilePath(here);
+			return new FilePath(here).Normalise();
 		}
 
 		public bool Exists(FilePath filePath)

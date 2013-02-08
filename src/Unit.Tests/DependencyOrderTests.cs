@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using PlatformBuild;
+using PlatformBuild.Rules;
 
 namespace Unit.Tests
 {

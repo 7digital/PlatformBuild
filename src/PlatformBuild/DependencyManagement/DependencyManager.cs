@@ -17,6 +17,7 @@ namespace PlatformBuild.DependencyManagement
 		public void CopyBuildResultsTo(FilePath dest)
 		{
 			// For every file in dest, if we have a newer copy then overwrite dest file.
+			if (!Directory.Exists(dest.ToEnvironmentalPath())) return;
             var files = Directory.GetFiles(dest.ToEnvironmentalPath(), _matchingPattern, SearchOption.TopDirectoryOnly);
 			foreach (var target in files)
 			{
@@ -30,6 +31,7 @@ namespace PlatformBuild.DependencyManagement
 
 		public void UpdateAvailableDependencies(FilePath srcPath)
 		{
+			if (!Directory.Exists(srcPath.ToEnvironmentalPath())) return;
 			// for every pattern file under srcPath, add to list if it's the newest
 			var files = Directory.GetFiles(srcPath.ToEnvironmentalPath(), _matchingPattern, SearchOption.AllDirectories);
 			foreach (var file in files)

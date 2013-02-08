@@ -1,13 +1,12 @@
 ﻿using System.IO;
-using System.Linq;
 
-namespace PlatformBuild.GitVCS
+namespace PlatformBuild.CmdLineProxies
 {
 	public interface IGit
 	{
 		void PullMaster(FilePath repoDir);
 		void Clone(FilePath repoDir, FilePath filePath, string repo);
-		void ResetLib(FilePath modulePath);
+		void Reset(FilePath path);
 		void PullCurrentBranch(FilePath modulePath);
 	}
 }

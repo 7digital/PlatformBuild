@@ -6,19 +6,19 @@ using System.Threading;
 using PlatformBuild.Crap;
 using PlatformBuild.FileSystem;
 
-namespace PlatformBuild
+namespace PlatformBuild.Rules
 {
 	public class Modules : IModules
 	{
-		readonly FilePath _rootPath;
+		readonly FilePath _moduleRulePath;
 		readonly IFileSystem _files;
 		public string[] Repos { get; set; }
 		public string[] Paths { get; set; }
 		public List<int>[] Deps { get; set; }
 
-		public Modules(FilePath filePath, IFileSystem files)
+		public Modules(FilePath moduleRulePath, IFileSystem files)
 		{
-			_rootPath = filePath;
+			_moduleRulePath = moduleRulePath;
 			_files = files;
 		}
 
@@ -28,14 +28,14 @@ namespace PlatformBuild
 		/// </summary>
 		public void ReadDependencies(FilePath rootPath)
 		{
-			ReadModules(_rootPath);
+			ReadModules(_moduleRulePath);
 			for (int i = 0; i < Paths.Length; i++)
 			{
 				var path = Paths[i];
-				var brf = BuildPath(rootPath, path);
-				if (!_files.Exists(brf)) continue;
+				var buildRuleFile = BuildPath(rootPath, path);
+				if (!_files.Exists(buildRuleFile)) continue;
 
-				var lines = _files.Lines(brf);
+				var lines = _files.Lines(buildRuleFile);
 				foreach (var line in lines)
 				{
 					Deps[i].Add(Paths.Index(line));
@@ -115,6 +115,7 @@ namespace PlatformBuild
 
 		void ReadModules(FilePath filePath)
 		{
+			Console.WriteLine("Reading "+filePath.ToEnvironmentalPath());
 			var lines = _files.Lines(filePath);
 
 			var c = lines.Length;
@@ -126,6 +127,7 @@ namespace PlatformBuild
 
 			for (int i = 0; i < c; i++)
 			{
+				Console.WriteLine(lines[i]);
 				var bits = lines[i].Split('=').Select(s => s.Trim()).ToArray();
 
 				Repos[i] = bits[1];

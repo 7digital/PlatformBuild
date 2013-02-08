@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using PlatformBuild;
+using PlatformBuild.CmdLineProxies;
 using PlatformBuild.DependencyManagement;
 using PlatformBuild.FileSystem;
-using PlatformBuild.GitVCS;
 using PlatformBuild.Rules;
 
 namespace Unit.Tests

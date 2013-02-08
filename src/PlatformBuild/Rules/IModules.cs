@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
-namespace PlatformBuild
+namespace PlatformBuild.Rules
 {
 	public interface IModules
 	{
