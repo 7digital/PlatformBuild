@@ -34,7 +34,7 @@ namespace PlatformBuild
 		public void Prepare()
 		{
 			_rootPath = _files.GetPlatformRoot();
-			Log.Info("Started in " + _rootPath.ToEnvironmentalPath() + "; Updating self");
+			Log.Status("Started in " + _rootPath.ToEnvironmentalPath() + "; Updating self");
 
 			_git.PullMaster(_rootPath);
 
@@ -92,7 +92,7 @@ namespace PlatformBuild
 
 				if (!_locks[i].WaitOne(TimeSpan.FromSeconds(1)))
 				{
-					Log.Status("Waiting for git update of " + moduleName);
+					Log.Info("Waiting for git update of " + moduleName);
 					if (!_locks[i].WaitOne(TimeSpan.FromSeconds(30)))
 					{
 						Log.Error("Waiting a long time for " + moduleName + " to update!");
@@ -108,7 +108,7 @@ namespace PlatformBuild
 					continue;
 				}
 
-				Log.Status("Starting build of " + moduleName);
+				Log.Info("Starting build of " + moduleName);
 				try
 				{
 					int code = _builder.Build(buildPath);

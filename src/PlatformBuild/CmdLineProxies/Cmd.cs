@@ -33,14 +33,16 @@ namespace PlatformBuild.CmdLineProxies
 			if (!proc.WaitForExit(10000))
 			{
 				LogOutput.Log.Error("Call taking a long time: " + callDescription);
-				proc.WaitForExit(10000);
+				proc.WaitForExit(60000);
 				LogOutput.Log.Error("ABORTING LONG CALL " + callDescription);
+// ReSharper disable EmptyGeneralCatchClause
+                try { proc.Kill(); } catch { }
+// ReSharper restore EmptyGeneralCatchClause
 			}
 
 			var errors = proc.StandardError.ReadToEnd();
             if (!string.IsNullOrWhiteSpace(errors)) LogOutput.Log.Error(proc.StandardError.ReadToEnd());
 
-            
             var messages = proc.StandardOutput.ReadToEnd();
 			if (proc.ExitCode != 0) LogOutput.Log.Error(messages);
 			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(messages);

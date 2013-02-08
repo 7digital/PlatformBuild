@@ -33,9 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LessStupidPath">
-      <HintPath>..\..\lib\LessStupidPath.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -49,6 +46,7 @@
     <Compile Include="Extensions\Extensions.cs" />
     <Compile Include="Builder.cs" />
     <Compile Include="DependencyManagement\DependencyManager.cs" />
+    <Compile Include="FilePath\FilePath.cs" />
     <Compile Include="FileSystem\IFileSystem.cs" />
     <Compile Include="CmdLineProxies\Cmd.cs" />
     <Compile Include="CmdLineProxies\Git.cs" />

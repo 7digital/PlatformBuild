@@ -23,7 +23,8 @@ namespace PlatformBuild.CmdLineProxies
             }
 
 			var sqlParams = File.ReadAllText(sqlInfo).Trim();
-			return buildPath.CallInFolder("sqlfk.exe", sqlParams + " -i \"" + script.ToEnvironmentalPath()+"\"");
+			Log.Status("                           " + script.LastElement());
+			return buildPath.CallInFolder("sqlfk.exe", sqlParams + " -i \"" + script.ToEnvironmentalPath() + "\"");
 		}
 	}
 }

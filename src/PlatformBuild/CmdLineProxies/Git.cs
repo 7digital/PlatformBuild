@@ -9,7 +9,7 @@ namespace PlatformBuild.CmdLineProxies
 		public void PullMaster(FilePath repoDir)
 		{
 			//repoDir.Call("git", "stash");
-			repoDir.Call("git", "pull origin master -q");
+			repoDir.Call("git", "pull origin master --verbose");
 		}
 
 		public void Clone(FilePath repoDir, FilePath filePath, string repo)
@@ -25,7 +25,7 @@ namespace PlatformBuild.CmdLineProxies
 		public void PullCurrentBranch(FilePath modulePath)
 		{
 			//modulePath.Call("git", "stash");
-			for (int i = 0; i < _retries; i++) if (modulePath.Call("git", "pull origin -q") == 0) break;
+			for (int i = 0; i < _retries; i++) if (modulePath.Call("git", "pull origin --verbose") == 0) break;
 			
             //if (modulePath.Call("git", "stash pop") != 0)
 				//throw new Exception("Possible merge conflicts in " + modulePath.ToEnvironmentalPath());
