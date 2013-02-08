@@ -114,7 +114,6 @@ namespace PlatformBuild
 					int code = _builder.Build(buildPath);
 					if (code != 0) Log.Error("Build failed: " + moduleName);
 					else Log.Status("Build complete: " + moduleName);
-					// todo : handle errors!
 				}
 				catch (Exception ex)
 				{
