@@ -1,7 +1,5 @@
-using System;
+using System.Diagnostics;
 using System.IO;
-using System.Text;
-using RunProcess;
 
 namespace PlatformBuild.CmdLineProxies
 {
@@ -14,34 +12,43 @@ namespace PlatformBuild.CmdLineProxies
 
 		public static int Call(this FilePath root, string exe, string args)
 		{
-            using (var process = new ProcessHost(exe, root.ToEnvironmentalPath()))
-            {
-				var callDescription = root.ToEnvironmentalPath() + ":" + exe + " " + args;
-				LogOutput.Log.Verbose(callDescription);
+			var processStartInfo = new ProcessStartInfo
+			{
+				FileName = exe,
+				Arguments = args,
+				ErrorDialog = false,
+				UseShellExecute = false,
+				WindowStyle = ProcessWindowStyle.Hidden,
+				CreateNoWindow = true,
+				WorkingDirectory = root.ToEnvironmentalPath(),
+				RedirectStandardError = true,
+				RedirectStandardOutput = true,
+			};
 
-                process.Start(args);
+			var callDescription = root.ToEnvironmentalPath() + ":" + exe + " " + args;
+			LogOutput.Log.Verbose(callDescription);
 
-                int exitCode;
-				if (!process.WaitForExit(TimeSpan.FromSeconds(10), out exitCode))
-				{
-					LogOutput.Log.Error("Call taking a long time: " + callDescription);
-					if (!process.WaitForExit(TimeSpan.FromSeconds(60), out exitCode))
-					{
-						LogOutput.Log.Error("ABORTING LONG CALL " + callDescription);
-						process.Kill();
-                        exitCode = 127;
-					}
-				}
+			var proc = Process.Start(processStartInfo);
 
-				var messages = process.StdOut.ReadAllText(Encoding.Default);
-				if (exitCode != 0) LogOutput.Log.Error(messages);
-				else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(messages);
-
-				var errors = process.StdErr.ReadAllText(Encoding.Default);
-				if (!string.IsNullOrWhiteSpace(errors)) LogOutput.Log.Error(errors);
-
-                return exitCode;
+			if (!proc.WaitForExit(10000))
+			{
+				LogOutput.Log.Error("Call taking a long time: " + callDescription);
+				proc.WaitForExit(60000);
+				LogOutput.Log.Error("ABORTING LONG CALL " + callDescription);
+				// ReSharper disable EmptyGeneralCatchClause
+				try { proc.Kill(); }
+				catch { }
+				// ReSharper restore EmptyGeneralCatchClause
 			}
+			var messages = proc.StandardOutput.ReadToEnd();
+			if (proc.ExitCode != 0) LogOutput.Log.Error(messages);
+			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(messages);
+
+			var errors = proc.StandardError.ReadToEnd();
+			if (!string.IsNullOrWhiteSpace(errors)) LogOutput.Log.Error(proc.StandardError.ReadToEnd());
+
+
+			return proc.ExitCode;
 		}
 	}
 }
