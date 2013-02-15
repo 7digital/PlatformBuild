@@ -5,7 +5,10 @@ namespace PlatformBuild.CmdLineProxies
 {
 	public static class Cmd
 	{
-        public static int CallInFolder(this FilePath root, string exe, string args)
+		const int twenty_seconds = 20000;
+		const int two_minutes = 120000;
+
+		public static int CallInFolder(this FilePath root, string exe, string args)
         {
             return Call(root, root.Navigate((FilePath)exe).ToEnvironmentalPath(), args);
         }
@@ -30,22 +33,24 @@ namespace PlatformBuild.CmdLineProxies
 
 			var proc = Process.Start(processStartInfo);
 
-			if (!proc.WaitForExit(10000))
+			if (!proc.WaitForExit(twenty_seconds))
 			{
 				LogOutput.Log.Error("Call taking a long time: " + callDescription);
-				proc.WaitForExit(60000);
+				proc.WaitForExit(two_minutes);
 				LogOutput.Log.Error("ABORTING LONG CALL " + callDescription);
 				// ReSharper disable EmptyGeneralCatchClause
 				try { proc.Kill(); }
 				catch { }
 				// ReSharper restore EmptyGeneralCatchClause
 			}
+
 			var messages = proc.StandardOutput.ReadToEnd();
 			if (proc.ExitCode != 0) LogOutput.Log.Error(messages);
 			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(messages);
 
 			var errors = proc.StandardError.ReadToEnd();
-			if (!string.IsNullOrWhiteSpace(errors)) LogOutput.Log.Error(proc.StandardError.ReadToEnd());
+			if (proc.ExitCode != 0) LogOutput.Log.Error(errors);
+			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(errors);
 
 
 			return proc.ExitCode;
