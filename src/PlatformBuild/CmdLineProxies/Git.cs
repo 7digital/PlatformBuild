@@ -5,7 +5,6 @@ namespace PlatformBuild.CmdLineProxies
 {
 	public class Git : IGit
 	{
-		const int _retries = 2;
 		readonly string _git;
 
 		public Git()
@@ -27,8 +26,7 @@ namespace PlatformBuild.CmdLineProxies
 
 		public void PullMaster(FilePath repoDir)
 		{
-			//repoDir.Call("git", "stash");
-			repoDir.Call("git", "pull origin master --verbose");
+			repoDir.Call("git", "pull origin master --ff-only --verbose");
 		}
 
 		public void Clone(FilePath repoDir, FilePath filePath, string repo)
@@ -43,11 +41,8 @@ namespace PlatformBuild.CmdLineProxies
 
 		public void PullCurrentBranch(FilePath modulePath)
 		{
-			//modulePath.Call("git", "stash");
-			for (int i = 0; i < _retries; i++) if (modulePath.Call("git", "pull origin --verbose") == 0) break;
-
-			//if (modulePath.Call("git", "stash pop") != 0)
-			//throw new Exception("Possible merge conflicts in " + modulePath.ToEnvironmentalPath());
+			if (modulePath.Call("git", "pull origin --ff-only --verbose") != 0)
+				throw new Exception("Git pull failed on " + modulePath.ToEnvironmentalPath() + "; Please resolve and try again");
 		}
 	}
 }
