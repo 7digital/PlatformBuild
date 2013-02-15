@@ -10,8 +10,8 @@ namespace PlatformBuild.CmdLineProxies
 		public Git()
 		{
 			var candidates = new[] {
-                @"C:\Program Files (x86)\Git\cmd\git.cmd",
-                @"C:\Program Files\Git\cmd\git.cmd"
+                @"C:\Program Files (x86)\Git\cmd\git.exe",
+                @"C:\Program Files\Git\cmd\git.exe"
 			};
 
 			foreach (var candidate in candidates)
@@ -26,7 +26,7 @@ namespace PlatformBuild.CmdLineProxies
 
 		public void PullMaster(FilePath repoDir)
 		{
-			repoDir.Call("git", "pull origin master --ff-only --verbose");
+			repoDir.Call("git", "pull --ff-only --verbose origin master");
 		}
 
 		public void Clone(FilePath repoDir, FilePath filePath, string repo)
@@ -41,7 +41,7 @@ namespace PlatformBuild.CmdLineProxies
 
 		public void PullCurrentBranch(FilePath modulePath)
 		{
-			if (modulePath.Call("git", "pull origin --ff-only --verbose") != 0)
+			if (modulePath.Call("git", "pull --ff-only --verbose origin") != 0)
 				throw new Exception("Git pull failed on " + modulePath.ToEnvironmentalPath() + "; Please resolve and try again");
 		}
 	}

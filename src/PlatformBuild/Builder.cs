@@ -51,20 +51,29 @@ namespace PlatformBuild
 			_locks = Modules.CreateAndSetLocks();
 		}
 
-		public void RunBuild()
+		public void RunBuild(bool runDatabases)
 		{
+            Thread databases = null;
+            if (runDatabases)
+            {
+				databases = new Thread(RebuildDatabases);
+				databases.Start();
+			}
+
 			var pulling = new Thread(PullRepos);
 			var building = new Thread(GetDependenciesAndBuild);
-			var databases = new Thread(RebuildDatabases);
 
 			pulling.Start();
-			databases.Start();
 			building.Start();
 
 			building.Join();
 			Log.Verbose("All builds finished");
-			databases.Join();
-			Log.Verbose("All databases updated");
+
+            if (runDatabases)
+            {
+	            databases.Join();
+	            Log.Verbose("All databases updated");
+            }
 		}
 
 		public void PullRepos()
