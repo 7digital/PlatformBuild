@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using PlatformBuild.CmdLineProxies;
 using PlatformBuild.DependencyManagement;
 using PlatformBuild.FileSystem;
@@ -20,6 +21,8 @@ namespace PlatformBuild
                 return;
             }
 
+			AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+
 			if (args.Length > 0) Log.SetLevel(args[0]);
             else Log.SetLevel("status");
 
@@ -31,29 +34,35 @@ namespace PlatformBuild
             var git = new Git();
 			var build = new BuildCmd();
 
-			var thing = new Builder(files, git, deps, rules, build); 
+			var thing = new Builder(files, git, deps, rules, build);
 
-            try
-            {
-	            thing.Prepare();
-	            thing.RunBuild(runDbs);
-            }
-            catch (Exception ex)
-            {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-				Console.WriteLine("Platform Build failed: " + ex.GetType() + " " + ex.Message + "\r\n\r\n" + ex.StackTrace);
-                Console.ResetColor();
-            }
+			thing.Prepare();
+			thing.RunBuild(runDbs);
+
 			var end = DateTime.Now;
 
 			Console.WriteLine("Completed " + end + ", took " + (end - start));
+		}
+
+		static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+		{
+            var ex = e.ExceptionObject as Exception;
+
+            if (ex != null)
+            {
+			    Console.ForegroundColor = ConsoleColor.Yellow;
+				Console.WriteLine("Unhandled error: " + ex.GetType() + " " + ex.Message + "\r\n\r\n" + ex.StackTrace);
+                Console.ResetColor();
+            } else Console.WriteLine("Unexpected error of unknown type: "+e.ExceptionObject.GetType());
+
+            Environment.Exit(1);
 		}
 
 		static void ShowHelp()
 		{
 			Console.WriteLine(@"Platform build tool
 
-First argument sets log level: (status, info, verbose, error). Default is status (lowest)
+First argument sets log level: (error, status, info, verbose). Default is status (2nd lowest)
 To skip databases, use 'no-databases'");
 		}
 	}

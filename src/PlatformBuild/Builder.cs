@@ -67,12 +67,12 @@ namespace PlatformBuild
 			building.Start();
 
 			building.Join();
-			Log.Verbose("All builds finished");
+			Log.Status("All builds finished");
 
             if (runDatabases)
             {
 	            databases.Join();
-	            Log.Verbose("All databases updated");
+	            Log.Status("All databases updated");
             }
 		}
 

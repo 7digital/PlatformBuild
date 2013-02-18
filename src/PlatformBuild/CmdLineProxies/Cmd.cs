@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 
@@ -13,7 +14,7 @@ namespace PlatformBuild.CmdLineProxies
             return Call(root, root.Navigate((FilePath)exe).ToEnvironmentalPath(), args);
         }
 
-		public static int Call(this FilePath root, string exe, string args)
+		public static int Call(this FilePath root, string exe, string args, Action<string, string> stdOutErr = null)
 		{
 			var processStartInfo = new ProcessStartInfo
 			{
@@ -52,6 +53,7 @@ namespace PlatformBuild.CmdLineProxies
 			if (proc.ExitCode != 0) LogOutput.Log.Error(errors);
 			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(errors);
 
+            if (stdOutErr != null) stdOutErr(messages, errors);
 
 			return proc.ExitCode;
 		}
