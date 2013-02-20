@@ -14,7 +14,8 @@ namespace PlatformBuild.CmdLineProxies
 		{
 			var candidates = (Environment.GetEnvironmentVariable("PATH")??"")
 				.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
-				.Where(p => p.ToLowerInvariant().Contains("git")).ToList();
+				.Where(p => p.ToLowerInvariant().Contains("git"))
+				.Select(s => s+"\\git.exe").ToList();
 			candidates.Add(@"C:\Program Files (x86)\Git\cmd\git.exe");
 			candidates.Add(@"C:\Program Files\Git\cmd\git.exe");
 
