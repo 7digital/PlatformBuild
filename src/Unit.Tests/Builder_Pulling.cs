@@ -54,9 +54,9 @@ namespace Unit.Tests
 		[Test]
 		public void resets_all_lib_folders()
 		{
-			_git.Received(1).Reset(The.Root.Navigate((FilePath)"group1/proj1/lib"));
-			_git.Received(1).Reset(The.Root.Navigate((FilePath)"group1/proj2/lib"));
-			_git.Received(1).Reset(The.Root.Navigate((FilePath)"group2/proj3/lib"));
+			_git.Received(1).CheckoutFolder(The.Root.Navigate((FilePath)"group1/proj1/lib"));
+			_git.Received(1).CheckoutFolder(The.Root.Navigate((FilePath)"group1/proj2/lib"));
+			_git.Received(1).CheckoutFolder(The.Root.Navigate((FilePath)"group2/proj3/lib"));
 		}
 
 		[Test]

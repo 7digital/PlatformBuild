@@ -83,7 +83,7 @@ namespace PlatformBuild
 				var modulePath = _rootPath.Navigate((FilePath)Modules.Paths[i]);
 				var libPath = modulePath.Navigate((FilePath)"lib");
 
-				if (_files.Exists(libPath)) _git.Reset(libPath);
+				if (_files.Exists(libPath)) _git.CheckoutFolder(libPath);
 				_git.PullCurrentBranch(modulePath);
 				Log.Status("Updated " + Modules.Paths[i]);
 				_locks[i].Set();
