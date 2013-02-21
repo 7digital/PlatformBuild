@@ -12,20 +12,28 @@ namespace PlatformBuild.CmdLineProxies
 
 		public Git()
 		{
-			var candidates = (Environment.GetEnvironmentVariable("PATH")??"")
-				.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+			_git = FindGit();
+			if (string.IsNullOrWhiteSpace(_git)) throw new Exception("Couldn't find Git command.");
+		}
+
+		static string FindGit()
+		{
+			var candidates = (Environment.GetEnvironmentVariable("PATH") ?? "")
+				.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries)
 				.Where(p => p.ToLowerInvariant().Contains("git"))
-				.Select(s => s+"\\git.exe").ToList();
-			candidates.Add(@"C:\Program Files (x86)\Git\cmd\git.exe");
-			candidates.Add(@"C:\Program Files\Git\cmd\git.exe");
+				.Select(s => s + "\\git.").ToList();
+			candidates.Add(@"C:\Program Files (x86)\Git\cmd\git.");
+			candidates.Add(@"C:\Program Files\Git\cmd\git.");
 
 			foreach (var candidate in candidates)
 			{
-				if (!File.Exists(candidate)) continue;
-				_git = candidate;
-			}
+				var cmd = candidate + "cmd";
+				var exe = candidate + "exe";
 
-			if (string.IsNullOrWhiteSpace(_git)) throw new Exception("Couldn't find Git command.");
+                if (File.Exists(cmd)) return cmd;
+                if (File.Exists(exe)) return exe;
+			}
+            return null;
 		}
 
 
