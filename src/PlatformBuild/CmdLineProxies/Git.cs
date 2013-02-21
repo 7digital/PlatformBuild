@@ -60,7 +60,7 @@ namespace PlatformBuild.CmdLineProxies
 			}
 			string s_err = "", s_out = "";
             string branch = "";
-            modulePath.Call(_git, "status --branch --porcelain", (o,e) => {
+            modulePath.Call(_git, "status --branch --short", (o,e) => {
                 branch = GuessBranch(o+e);
             });
 
@@ -77,7 +77,7 @@ namespace PlatformBuild.CmdLineProxies
 		static string GuessBranch(string output)
 		{
             const string tag = "## ";
-			const string defaultBranch = "XXXXX";
+			const string defaultBranch = "master";
 
 			var idx = output.IndexOf(tag, StringComparison.Ordinal);
 
