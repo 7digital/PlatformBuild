@@ -21,17 +21,17 @@ namespace PlatformBuild.CmdLineProxies
 			var candidates = (Environment.GetEnvironmentVariable("PATH") ?? "")
 				.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries)
 				.Where(p => p.ToLowerInvariant().Contains("git"))
-				.Select(s => s + "\\git.").ToList();
-			candidates.Add(@"C:\Program Files (x86)\Git\cmd\git.");
-			candidates.Add(@"C:\Program Files\Git\cmd\git.");
+				.Select(s => s + "\\").ToList();
+			candidates.Add(@"C:\Program Files (x86)\Git\cmd\");
+			candidates.Add(@"C:\Program Files\Git\cmd\");
 
 			foreach (var candidate in candidates)
 			{
-				var cmd = candidate + "cmd";
-				var exe = candidate + "exe";
+				var a = candidate + "..\\bin\\git.exe";
+				var b = candidate + "git.exe";
 
-                if (File.Exists(cmd)) return cmd;
-                if (File.Exists(exe)) return exe;
+                if (File.Exists(a)) return a;
+                if (File.Exists(b)) return b;
 			}
             return null;
 		}
@@ -59,8 +59,12 @@ namespace PlatformBuild.CmdLineProxies
 				Log.Status("Git server keeps hanging up. Will continue with local copy");
 			}
 			string s_err = "", s_out = "";
+            string branch = "";
+            modulePath.Call(_git, "status --branch --porcelain", (o,e) => {
+                branch = GuessBranch(o+e);
+            });
 
-			if (modulePath.Call(_git, "pull --ff-only --verbose origin", (o, e) => { s_err = e; s_out = o; }) != 0)
+			if (modulePath.Call(_git, "pull --ff-only --verbose origin "+branch, (o, e) => { s_err = e; s_out = o; }) != 0)
 			{
 				if (s_err.Contains(FatalHangup) || s_out.Contains(FatalHangup))
 				{
@@ -68,6 +72,22 @@ namespace PlatformBuild.CmdLineProxies
 				}
 				else throw new Exception("Git pull failed on " + modulePath.ToEnvironmentalPath() + "; Please resolve and try again");
 			}
+		}
+
+		static string GuessBranch(string output)
+		{
+            const string tag = "## ";
+			const string defaultBranch = "XXXXX";
+
+			var idx = output.IndexOf(tag, StringComparison.Ordinal);
+
+			if (idx < 0) return defaultBranch;
+            idx += tag.Length;
+
+            var idx2 = output.IndexOfAny(new []{'\r', '\n'}, idx);
+            if (idx2 < 0) return defaultBranch;
+
+            return output.Substring(idx, idx2-idx);
 		}
 	}
 }
