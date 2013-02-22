@@ -87,7 +87,9 @@ namespace PlatformBuild.CmdLineProxies
             var idx2 = output.IndexOfAny(new []{'\r', '\n'}, idx);
             if (idx2 < 0) return defaultBranch;
 
-            return output.Substring(idx, idx2-idx);
+			var guess = output.Substring(idx, idx2-idx);
+
+			return guess.Contains("...") ? "" : guess;
 		}
 	}
 }
