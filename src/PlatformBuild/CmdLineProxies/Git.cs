@@ -54,21 +54,32 @@ namespace PlatformBuild.CmdLineProxies
 
 		public void PullCurrentBranch(FilePath modulePath, int times = 0)
 		{
-			if (times > 3)
-			{
-				Log.Status("Git server keeps hanging up. Will continue with local copy");
-			}
-			string s_err = "", s_out = "";
             string branch = "";
             modulePath.Call(_git, "status --branch --short", (o,e) => {
                 branch = GuessBranch(o+e);
             });
 
-			if (modulePath.Call(_git, "pull --ff-only --verbose origin "+branch, (o, e) => { s_err = e; s_out = o; }) != 0)
+			TryGitCommand(modulePath, times, "pull --ff-only --verbose origin " + branch);
+			TryGitCommand(modulePath, times, "submodule update --init");
+		}
+
+		void TryGitCommand(FilePath modulePath, int times, string command)
+		{
+			if (times > 3)
+			{
+				Log.Status("Git server keeps hanging up. Will continue with local copy");
+			}
+			string s_out = "";
+			string s_err = "";
+			if (modulePath.Call(_git, command, (o, e) =>
+				{
+					s_err = e;
+					s_out = o;
+				}) != 0)
 			{
 				if (s_err.Contains(FatalHangup) || s_out.Contains(FatalHangup))
 				{
-					PullCurrentBranch(modulePath, times + 1);
+					TryGitCommand(modulePath, times + 1, command);
 				}
 				else throw new Exception("Git pull failed on " + modulePath.ToEnvironmentalPath() + "; Please resolve and try again");
 			}
