@@ -10,9 +10,9 @@ namespace PlatformBuild.CmdLineProxies
 		const int two_minutes = 120000;
 
 		public static int CallInFolder(this FilePath root, string exe, string args)
-        {
-            return Call(root, root.Navigate((FilePath)exe).ToEnvironmentalPath(), args);
-        }
+		{
+			return Call(root, root.Navigate((FilePath)exe).ToEnvironmentalPath(), args);
+		}
 
 		public static int Call(this FilePath root, string exe, string args, Action<string, string> stdOutErr = null)
 		{
@@ -36,14 +36,18 @@ namespace PlatformBuild.CmdLineProxies
 
 			if (!proc.WaitForExit(thirty_seconds))
 			{
-				LogOutput.Log.Error("Call taking a long time, will abort in 2 minutes: " + callDescription);
-				proc.WaitForExit(two_minutes);
-				LogOutput.Log.Error("ABORTING LONG CALL: " + callDescription);
-				// ReSharper disable EmptyGeneralCatchClause
-				try { proc.Kill(); }
-				catch { }
-				// ReSharper restore EmptyGeneralCatchClause
-                return -1;
+				LogOutput.Log.Warning("Call taking a long time, will abort in 2 minutes: " + callDescription);
+				if (!proc.WaitForExit(two_minutes))
+				{
+					LogOutput.Log.Error("ABORTING LONG CALL: " + callDescription);
+					// ReSharper disable EmptyGeneralCatchClause
+					try
+					{
+						proc.Kill();
+					}
+					catch { }
+					// ReSharper restore EmptyGeneralCatchClause
+				}
 			}
 
 			var messages = proc.StandardOutput.ReadToEnd();
@@ -54,7 +58,7 @@ namespace PlatformBuild.CmdLineProxies
 			if (proc.ExitCode != 0) LogOutput.Log.Error(errors);
 			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(errors);
 
-            if (stdOutErr != null) stdOutErr(messages, errors);
+			if (stdOutErr != null) stdOutErr(messages, errors);
 
 			return proc.ExitCode;
 		}
