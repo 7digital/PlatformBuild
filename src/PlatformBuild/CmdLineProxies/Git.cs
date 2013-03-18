@@ -27,8 +27,8 @@ namespace PlatformBuild.CmdLineProxies
 
 			foreach (var candidate in candidates)
 			{
-				var a = candidate + "..\\bin\\git.exe";
-				var b = candidate + "git.exe";
+				var a = candidate + "git.exe";
+				var b = candidate + "..\\bin\\git.exe";
 
 				if (File.Exists(a)) return a;
 				if (File.Exists(b)) return b;

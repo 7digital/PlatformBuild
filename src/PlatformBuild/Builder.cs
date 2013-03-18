@@ -43,7 +43,9 @@ namespace PlatformBuild
 			Modules.ReadDependencies(_rootPath);
 			Modules.SortInDependencyOrder();
 
-            _depMgr.ReadMasters(_rootPath, _patterns.Masters);
+			_depMgr.ReadMasters(_rootPath, _patterns.Masters);
+
+			DeleteOldPaths();
 
 			Log.Verbose("Processing " + string.Join(", ", Modules.Paths));
 			CloneMissingRepos();
@@ -51,11 +53,28 @@ namespace PlatformBuild
 			_locks = Modules.CreateAndSetLocks();
 		}
 
+		void DeleteOldPaths()
+		{
+			Log.Verbose("Deleting old paths");
+			foreach(var path in _rules.GetPathsToDelete())
+			{
+				if (! _files.Exists(path)) continue;
+					
+				try
+				{
+					_files.DeletePath(path);
+				} catch (Exception ex)
+				{
+					Log.Error("Failed to delete " + path.ToEnvironmentalPath());
+				}
+			}
+		}
+
 		public void RunBuild(bool runDatabases)
 		{
-            Thread databases = null;
-            if (runDatabases)
-            {
+			Thread databases = null;
+			if (runDatabases)
+			{
 				databases = new Thread(RebuildDatabases);
 				databases.Start();
 			}
@@ -69,11 +88,11 @@ namespace PlatformBuild
 			building.Join();
 			Log.Status("All builds finished");
 
-            if (runDatabases)
-            {
-	            databases.Join();
-	            Log.Status("All databases updated");
-            }
+			if (runDatabases)
+			{
+				databases.Join();
+				Log.Status("All databases updated");
+			}
 		}
 
 		public void PullRepos()

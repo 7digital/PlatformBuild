@@ -43,5 +43,14 @@ namespace PlatformBuild.FileSystem
 			list.Sort();
 			return list.Select(f => new FilePath(f));
 		}
+
+		public void DeletePath(FilePath path)
+		{
+			var epath = path.ToEnvironmentalPath();
+			if (Directory.Exists(epath))
+				Directory.Delete(epath,true);
+ 			else
+				File.Delete(epath);
+		}
 	}
 }

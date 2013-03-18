@@ -9,5 +9,6 @@ namespace PlatformBuild.FileSystem
 		bool Exists(FilePath filePath);
 		string[] Lines(FilePath path);
 		IEnumerable<FilePath> SortedDescendants(FilePath filePath, string pattern);
+		void DeletePath(FilePath path);
 	}
 }
