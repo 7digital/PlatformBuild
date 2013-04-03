@@ -65,7 +65,7 @@ namespace PlatformBuild
 					_files.DeletePath(path);
 				} catch (Exception ex)
 				{
-					Log.Error("Failed to delete " + path.ToEnvironmentalPath());
+					Log.Error("Failed to delete " + path.ToEnvironmentalPath() + ", because of a " + ex.GetType());
 				}
 			}
 		}

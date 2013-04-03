@@ -10,14 +10,14 @@ namespace PlatformBuild.FileSystem
 	{
 		public FilePath GetPlatformRoot()
 		{
-            var here= Assembly.GetExecutingAssembly().Location;
-            
-            while (!Directory.Exists(Path.Combine(here, ".git")))
-            {
-                var next = Path.Combine(here, "..");
-                if (here == next) throw new Exception("Not in a Git build platform");
-                here = next;
-            }
+			var here = Assembly.GetExecutingAssembly().Location;
+
+			while (!Directory.Exists(Path.Combine(here, ".git")))
+			{
+				var next = Path.Combine(here, "..");
+				if (here == next) throw new Exception("Not in a Git build platform");
+				here = next;
+			}
 
 			return new FilePath(here).Normalise();
 		}
@@ -30,7 +30,7 @@ namespace PlatformBuild.FileSystem
 
 		public string[] Lines(FilePath path)
 		{
-			return 
+			return
 				File.ReadAllLines(path.ToEnvironmentalPath())
 				.Where(l => !l.StartsWith("#") && !string.IsNullOrWhiteSpace(l)).ToArray();
 		}
@@ -47,9 +47,13 @@ namespace PlatformBuild.FileSystem
 		public void DeletePath(FilePath path)
 		{
 			var epath = path.ToEnvironmentalPath();
+			var gitPath = path.Navigate((FilePath)".git").ToEnvironmentalPath();
+
+			if (Directory.Exists(gitPath)) Directory.Delete(gitPath, true);
+
 			if (Directory.Exists(epath))
-				Directory.Delete(epath,true);
- 			else
+				Directory.Delete(epath, true);
+			else
 				File.Delete(epath);
 		}
 	}
