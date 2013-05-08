@@ -56,5 +56,15 @@ namespace PlatformBuild.FileSystem
 			else
 				File.Delete(epath);
 		}
+
+		public FilePath GetFirstMatch(FilePath root, string pattern)
+		{
+			var first = Directory.EnumerateFiles(root.ToEnvironmentalPath(), pattern, SearchOption.TopDirectoryOnly)
+				.FirstOrDefault();
+
+			if (string.IsNullOrEmpty(first)) return null;
+
+			return (FilePath)first;
+		}
 	}
 }

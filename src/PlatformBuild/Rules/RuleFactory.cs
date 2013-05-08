@@ -25,16 +25,22 @@ namespace PlatformBuild.Rules
 			var libPath = _rootDirectory.Navigate((FilePath)"_rules/DependencyPath.rule");
 			var libPatt = _rootDirectory.Navigate((FilePath)"_rules/DependencyPatterns.rule");
 			var masters = _rootDirectory.Navigate((FilePath)"_rules/Masters.rule");
+			var build = _rootDirectory.Navigate((FilePath)"_rules/BuildCommand.rule");
 
 			if (!_files.Exists(libPath)) throw new Exception("_rules/DependencyPath.rule is missing");
 			if (!_files.Exists(libPatt)) throw new Exception("_rules/DependencyPatterns.rule is missing");
 			if (!_files.Exists(masters)) throw new Exception("_rules/Masters.rule is missing");
+			if (!_files.Exists(build)) throw new Exception("_rules/BuildCommand.rule is missing");
+
+			var bcmd = _files.Lines(build).First().Split('=');
 
 			return new Patterns
 			{
 				DependencyPath = new FilePath(_files.Lines(libPath).First()),
 				DependencyPattern = string.Join("|", _files.Lines(libPatt)),
-				Masters = _files.Lines(masters).Select(str => (FilePath)str).ToArray()
+				Masters = _files.Lines(masters).Select(str => (FilePath)str).ToArray(),
+				BuildCmd = bcmd[1].Trim(),
+				BuildPattern = bcmd[0].Trim()
 			};
 		}
 

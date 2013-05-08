@@ -10,5 +10,6 @@ namespace PlatformBuild.FileSystem
 		string[] Lines(FilePath path);
 		IEnumerable<FilePath> SortedDescendants(FilePath filePath, string pattern);
 		void DeletePath(FilePath path);
+		FilePath GetFirstMatch(FilePath root, string pattern);
 	}
 }

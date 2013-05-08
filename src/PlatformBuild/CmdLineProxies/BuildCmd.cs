@@ -1,20 +1,30 @@
 ﻿using System;
 using System.IO;
+using PlatformBuild.FileSystem;
 using PlatformBuild.LogOutput;
+using PlatformBuild.Rules;
 
 namespace PlatformBuild.CmdLineProxies
 {
 	public class BuildCmd : IBuildCmd
 	{
+		readonly IPatterns _patterns;
+		readonly IFileSystem _files;
+
+		public BuildCmd(IPatterns patterns, IFileSystem files)
+		{
+			_patterns = patterns;
+			_files = files;
+		}
+
 		public int Build(FilePath buildPath)
 		{
-			var executablePath = buildPath.Append((FilePath)"Build.cmd").ToEnvironmentalPath();
+			var path = _files.GetFirstMatch(buildPath, _patterns.BuildPattern);
+			if (path == null) return 0;
 
-			if (File.Exists(executablePath))
-				return buildPath.CallInFolder("Build.cmd", "");
+			var c = "/c " + string.Format(_patterns.BuildCmd, path.LastElement());
 
-			Log.Warning(string.Format("No Build.cmd for {0}", buildPath.ToEnvironmentalPath()));
-			return 0;
+			return buildPath.Call("cmd", c);
 		}
 
 		public int RunSqlScripts(FilePath root, FilePath script)

@@ -7,5 +7,8 @@ namespace PlatformBuild.Rules
 		FilePath[] Masters { get; }
 		FilePath DependencyPath { get; }
 		string DependencyPattern { get; }
+
+		string BuildPattern { get; }
+		string BuildCmd { get; }
 	}
 }
