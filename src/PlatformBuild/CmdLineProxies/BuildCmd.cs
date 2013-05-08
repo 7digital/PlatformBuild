@@ -7,7 +7,13 @@ namespace PlatformBuild.CmdLineProxies
 	{
 		public int Build(FilePath buildPath)
 		{
-			return buildPath.CallInFolder("Build.cmd", "");
+			var executablePath = buildPath.Append((FilePath) "Build.cmd").ToEnvironmentalPath();
+			
+			if (File.Exists(executablePath))
+				return buildPath.CallInFolder("Build.cmd", "");
+
+			Log.Warning(string.Format("No Build.cmd for {0}", buildPath.ToEnvironmentalPath()));
+			return 0;
 		}
 
 		public int RunSqlScripts(FilePath root, FilePath script)

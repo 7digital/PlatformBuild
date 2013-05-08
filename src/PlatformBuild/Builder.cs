@@ -114,7 +114,7 @@ namespace PlatformBuild
 			for (int i = 0; i < Modules.Paths.Length; i++)
 			{
 				var moduleName = Modules.Paths[i];
-				var buildPath = _rootPath.Navigate((FilePath)(moduleName + "/build"));
+				var buildPath = _rootPath.Navigate((FilePath)(moduleName));
 				var libPath = _rootPath.Navigate((FilePath)(moduleName)).Navigate(_patterns.DependencyPath);
 				var srcPath = _rootPath.Navigate((FilePath)(moduleName + "/src"));
 

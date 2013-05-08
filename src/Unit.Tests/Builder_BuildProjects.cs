@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using NSubstitute;
 using NUnit.Framework;
 using PlatformBuild;
@@ -35,8 +31,7 @@ namespace Unit.Tests
 			_filesystem = Substitute.For<IFileSystem>();
 			_filesystem.GetPlatformRoot().Returns(The.Root);
 
-			var skipBuild = The.Root.Navigate((FilePath)"group1/proj2/build");
-            _filesystem.Exists(null).ReturnsForAnyArgs(c=> c.Args()[0] as FilePath != skipBuild);
+            _filesystem.Exists(null).ReturnsForAnyArgs(true);
 
 			_modules = Substitute.For<IModules>();
 			_modules.Paths.Returns(new[] {"group1/proj1", "group1/proj2", "group2/proj3"});
@@ -72,19 +67,19 @@ namespace Unit.Tests
 		}
 
 		[Test]
-		public void builds_all_projects_with_a_build_folder ()
+		public void builds_all_projects ()
 		{
-			_buildCmd.Received().Build(The.Root.Navigate((FilePath)"group1/proj1/build"));
-			_buildCmd.Received().Build(The.Root.Navigate((FilePath)"group2/proj3/build"));
-			_buildCmd.DidNotReceive().Build(The.Root.Navigate((FilePath)"group1/proj2/build"));
+			_buildCmd.Received().Build(The.Root.Navigate((FilePath)"group1/proj1"));
+			_buildCmd.Received().Build(The.Root.Navigate((FilePath)"group1/proj2"));
+			_buildCmd.Received().Build(The.Root.Navigate((FilePath)"group2/proj3"));
 		}
 
 		[Test]
 		public void distributes_new_binaries_for_all_built_projects ()
 		{
 			_depMgr.Received().UpdateAvailableDependencies(The.Root.Navigate((FilePath)"group1/proj1/src"));
+			_depMgr.Received().UpdateAvailableDependencies(The.Root.Navigate((FilePath)"group1/proj2/src"));
 			_depMgr.Received().UpdateAvailableDependencies(The.Root.Navigate((FilePath)"group2/proj3/src"));
-			_depMgr.DidNotReceive().UpdateAvailableDependencies(The.Root.Navigate((FilePath)"group1/proj2/src"));
 		}
 	}
 }
