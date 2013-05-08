@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using PlatformBuild.LogOutput;
 
 namespace PlatformBuild.CmdLineProxies
@@ -38,7 +39,7 @@ namespace PlatformBuild.CmdLineProxies
 
 			// quick and dirty hack way:
 			Log.Status("                           " + script.LastElement());
-			return root.CallInFolder("sqlcmd.exe", " -i \"" + script.ToEnvironmentalPath() + "\" -S .\\\\SQLEXPRESS -E");
+			return root.Call("sqlcmd.exe", " -i \"" + script.ToEnvironmentalPath() + "\" -S .\\SQLEXPRESS -E");
 		}
 	}
 }
