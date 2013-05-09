@@ -4,7 +4,7 @@ namespace PlatformBuild.CmdLineProxies
 {
 	public interface IBuildCmd
 	{
-		int Build(FilePath buildPath);
-        int RunSqlScripts(FilePath root, FilePath script);
+		int Build(FilePath rootPath, FilePath buildPath);
+		int RunSqlScripts(FilePath root, FilePath script);
 	}
 }

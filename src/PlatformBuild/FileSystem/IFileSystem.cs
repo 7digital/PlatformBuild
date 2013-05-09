@@ -11,5 +11,8 @@ namespace PlatformBuild.FileSystem
 		IEnumerable<FilePath> SortedDescendants(FilePath filePath, string pattern);
 		void DeletePath(FilePath path);
 		FilePath GetFirstMatch(FilePath root, string pattern);
+		void CopyDirectory(FilePath src, FilePath dst);
+		bool DirectoryExists(FilePath p);
+		bool IsFile(FilePath target);
 	}
 }

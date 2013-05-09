@@ -66,5 +66,63 @@ namespace PlatformBuild.FileSystem
 
 			return (FilePath)first;
 		}
+
+		public void CopyDirectory(FilePath src, FilePath dst)
+		{
+			if (!DirectoryExists(src)) throw new Exception("Source was not a folder or doesn't exist");
+			if (!DirectoryExists(dst)) throw new Exception("Destination was not a folder or doesn't exist");
+
+			var target = dst.Append((FilePath)src.LastElement());
+			if (IsFile(target)) throw new Exception("Destination already exists as a file");
+			if (DirectoryExists(target)) DeletePath(target);
+
+			DirectoryCopy(src.ToEnvironmentalPath(), target.ToEnvironmentalPath(), true);
+		}
+
+		public bool IsFile(FilePath target)
+		{
+			return File.Exists(target.ToEnvironmentalPath());
+		}
+
+		public bool DirectoryExists(FilePath p)
+		{
+			return Directory.Exists(p.ToEnvironmentalPath());
+		}
+
+		/// <summary>
+		/// Actually recommended by MS, rather than fixing the base class library
+		/// http://msdn.microsoft.com/en-us/library/bb762914.aspx
+		/// </summary>
+		private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
+		{
+			var dir = new DirectoryInfo(sourceDirName);
+			var dirs = dir.GetDirectories();
+
+			if (!dir.Exists)
+			{
+				throw new DirectoryNotFoundException(
+					"Source directory does not exist or could not be found: "
+					+ sourceDirName);
+			}
+
+			if (!Directory.Exists(destDirName))
+			{
+				Directory.CreateDirectory(destDirName);
+			}
+
+			var files = dir.GetFiles();
+			foreach (var file in files)
+			{
+				var temppath = Path.Combine(destDirName, file.Name);
+				file.CopyTo(temppath, false);
+			}
+
+			if (!copySubDirs) return;
+			foreach (var subdir in dirs)
+			{
+				var temppath = Path.Combine(destDirName, subdir.Name);
+				DirectoryCopy(subdir.FullName, temppath, true);
+			}
+		}
 	}
 }

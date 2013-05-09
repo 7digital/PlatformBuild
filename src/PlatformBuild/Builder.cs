@@ -139,7 +139,7 @@ namespace PlatformBuild
 				Log.Info("Starting build of " + moduleName);
 				try
 				{
-					int code = _builder.Build(buildPath);
+					int code = _builder.Build(_rootPath, buildPath);
 					if (code != 0) Log.Error("Build failed: " + moduleName);
 					else Log.Status("Build complete: " + moduleName);
 				}

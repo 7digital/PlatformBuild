@@ -69,9 +69,9 @@ namespace Unit.Tests
 		[Test]
 		public void builds_all_projects ()
 		{
-			_buildCmd.Received().Build(The.Root.Navigate((FilePath)"group1/proj1"));
-			_buildCmd.Received().Build(The.Root.Navigate((FilePath)"group1/proj2"));
-			_buildCmd.Received().Build(The.Root.Navigate((FilePath)"group2/proj3"));
+			_buildCmd.Received().Build(The.Root, The.Root.Navigate((FilePath)"group1/proj1"));
+			_buildCmd.Received().Build(The.Root, The.Root.Navigate((FilePath)"group1/proj2"));
+			_buildCmd.Received().Build(The.Root, The.Root.Navigate((FilePath)"group2/proj3"));
 		}
 
 		[Test]

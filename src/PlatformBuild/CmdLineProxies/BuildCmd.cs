@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using PlatformBuild.FileSystem;
 using PlatformBuild.LogOutput;
 using PlatformBuild.Rules;
@@ -17,11 +16,12 @@ namespace PlatformBuild.CmdLineProxies
 			_files = files;
 		}
 
-		public int Build(FilePath buildPath)
+		public int Build(FilePath rootPath, FilePath buildPath)
 		{
 			var path = _files.GetFirstMatch(buildPath, _patterns.BuildPattern);
 			if (path == null) return 0;
 
+			_files.CopyDirectory(rootPath.Navigate((FilePath)"_build"), buildPath);
 			var c = "/c " + string.Format(_patterns.BuildCmd, path.LastElement());
 
 			return buildPath.Call("cmd", c);
