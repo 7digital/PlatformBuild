@@ -111,15 +111,19 @@ namespace PlatformBuild.FileSystem
 			var files = dir.GetFiles();
 			foreach (var file in files)
 			{
-				var temppath = Path.Combine(destDirName, file.Name);
+				if (file.Name.ToLowerInvariant() == ".git") continue;
 				if (file.Attributes.HasFlag(FileAttributes.Hidden)) continue;
-				file.CopyTo(temppath, true);
+
+				var newLocation = Path.Combine(destDirName, file.Name);
+				file.CopyTo(newLocation, true);
 			}
 
 			if (!copySubDirs) return;
 			foreach (var subdir in dirs)
 			{
+				if (subdir.Name.ToLowerInvariant() == ".git") continue;
 				if (subdir.Attributes.HasFlag(FileAttributes.Hidden)) continue;
+
 				var temppath = Path.Combine(destDirName, subdir.Name);
 				DirectoryCopy(subdir.FullName, temppath, true);
 			}
