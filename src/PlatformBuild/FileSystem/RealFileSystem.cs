@@ -94,6 +94,8 @@ namespace PlatformBuild.FileSystem
 		private static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
 		{
 			var dir = new DirectoryInfo(sourceDirName);
+			if (dir.Name.ToLowerInvariant() == ".git") return;
+			if (dir.Attributes.HasFlag(FileAttributes.Hidden)) return;
 			var dirs = dir.GetDirectories();
 
 			if (!dir.Exists)
@@ -112,6 +114,7 @@ namespace PlatformBuild.FileSystem
 			foreach (var file in files)
 			{
 				if (file.Name.ToLowerInvariant() == ".git") continue;
+				if (file.FullName.ToLowerInvariant().Contains("/.git/")) continue;
 				if (file.Attributes.HasFlag(FileAttributes.Hidden)) continue;
 
 				var newLocation = Path.Combine(destDirName, file.Name);
