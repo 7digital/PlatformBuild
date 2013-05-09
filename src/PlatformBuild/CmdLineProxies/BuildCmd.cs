@@ -21,7 +21,9 @@ namespace PlatformBuild.CmdLineProxies
 			var path = _files.GetFirstMatch(buildPath, _patterns.BuildPattern);
 			if (path == null) return 0;
 
-			_files.CopyDirectory(rootPath.Navigate((FilePath)"_build"), buildPath);
+			_files.CopyDirectory(
+				rootPath.Navigate((FilePath)"_build"),
+				buildPath.Navigate((FilePath)"build"));
 			var c = "/c " + string.Format(_patterns.BuildCmd, path.LastElement());
 
 			return buildPath.Call("cmd", c);

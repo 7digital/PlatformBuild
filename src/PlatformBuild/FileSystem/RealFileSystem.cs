@@ -70,13 +70,11 @@ namespace PlatformBuild.FileSystem
 		public void CopyDirectory(FilePath src, FilePath dst)
 		{
 			if (!DirectoryExists(src)) throw new Exception("Source was not a folder or doesn't exist");
-			if (!DirectoryExists(dst)) throw new Exception("Destination was not a folder or doesn't exist");
 
-			var target = dst.Append((FilePath)src.LastElement());
-			if (IsFile(target)) throw new Exception("Destination already exists as a file");
-			if (DirectoryExists(target)) DeletePath(target);
+			if (IsFile(dst)) throw new Exception("Destination already exists as a file");
+			if (DirectoryExists(dst)) DeletePath(dst);
 
-			DirectoryCopy(src.ToEnvironmentalPath(), target.ToEnvironmentalPath(), true);
+			DirectoryCopy(src.ToEnvironmentalPath(), dst.ToEnvironmentalPath(), true);
 		}
 
 		public bool IsFile(FilePath target)
@@ -114,12 +112,14 @@ namespace PlatformBuild.FileSystem
 			foreach (var file in files)
 			{
 				var temppath = Path.Combine(destDirName, file.Name);
-				file.CopyTo(temppath, false);
+				if (file.Attributes.HasFlag(FileAttributes.Hidden)) continue;
+				file.CopyTo(temppath, true);
 			}
 
 			if (!copySubDirs) return;
 			foreach (var subdir in dirs)
 			{
+				if (subdir.Attributes.HasFlag(FileAttributes.Hidden)) continue;
 				var temppath = Path.Combine(destDirName, subdir.Name);
 				DirectoryCopy(subdir.FullName, temppath, true);
 			}
