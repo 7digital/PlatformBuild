@@ -30,8 +30,8 @@ namespace PlatformBuild.CmdLineProxies
 				var a = candidate + "git.exe";
 				var b = candidate + "..\\bin\\git.exe";
 
-				if (File.Exists(a)) return a;
-				if (File.Exists(b)) return b;
+				if (File.Exists(a)) return "\"" + a + "\" ";
+				if (File.Exists(b)) return "\"" + b + "\" ";
 			}
 			return null;
 		}
@@ -39,23 +39,23 @@ namespace PlatformBuild.CmdLineProxies
 
 		public void PullMaster(FilePath repoDir)
 		{
-			repoDir.Call(_git, "pull --ff-only --verbose origin master");
+			repoDir.Call("cmd", "/c " + _git + "pull --ff-only --verbose origin master");
 		}
 
 		public void Clone(FilePath repoDir, FilePath filePath, string repo)
 		{
-			repoDir.Call(_git, "clone " + repo + " " + filePath.Unroot(repoDir).ToPosixPath());
+			repoDir.Call("cmd", "/c " + _git + "clone " + repo + " " + filePath.Unroot(repoDir).ToPosixPath());
 		}
 
 		public void CheckoutFolder(FilePath path)
 		{
-			path.Call(_git, "checkout . --theirs");
+			path.Call("cmd", "/c " + _git + "checkout . --theirs");
 		}
 
 		public void PullCurrentBranch(FilePath modulePath, int times = 0)
 		{
 			string branch = "";
-			modulePath.Call(_git, "status --branch --short", (o, e) =>
+			modulePath.Call("cmd", "/c " + _git + "status --branch --short", (o, e) =>
 			{
 				branch = GuessBranch(o + e);
 			});
@@ -73,7 +73,7 @@ namespace PlatformBuild.CmdLineProxies
 			}
 			string s_out = "";
 			string s_err = "";
-			if (modulePath.Call(_git, command, (o, e) =>
+			if (modulePath.Call("cmd", "/c " + _git +  command, (o, e) =>
 				{
 					s_err = e;
 					s_out = o;
