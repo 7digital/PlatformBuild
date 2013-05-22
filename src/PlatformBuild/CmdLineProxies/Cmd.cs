@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 
 namespace PlatformBuild.CmdLineProxies
 {
@@ -32,7 +33,14 @@ namespace PlatformBuild.CmdLineProxies
 			var callDescription = root.ToEnvironmentalPath() + ":" + exe + " " + args;
 			LogOutput.Log.Verbose(callDescription);
 
+
 			var proc = Process.Start(processStartInfo);
+
+			var messagesSB = new StringBuilder();
+			var errorsSB = new StringBuilder();
+
+			proc.ErrorDataReceived += (s,e) => errorsSB.Append(e.Data);
+			proc.OutputDataReceived += (s,e) => messagesSB.Append(e.Data);
 
 			if (!proc.WaitForExit(thirty_seconds))
 			{
@@ -50,11 +58,13 @@ namespace PlatformBuild.CmdLineProxies
 				}
 			}
 
-			var messages = proc.StandardOutput.ReadToEnd();
+			var messages = messagesSB.ToString();
+			var errors = errorsSB.ToString();
+
+
 			if (proc.ExitCode != 0) LogOutput.Log.Error(messages);
 			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(messages);
 
-			var errors = proc.StandardError.ReadToEnd();
 			if (proc.ExitCode != 0) LogOutput.Log.Error(errors);
 			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(errors);
 

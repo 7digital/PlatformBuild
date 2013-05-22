@@ -24,9 +24,11 @@ namespace PlatformBuild.CmdLineProxies
 			_files.CopyDirectory(
 				rootPath.Navigate((FilePath)"_build"),
 				buildPath.Navigate((FilePath)"build"));
-			var c = "/c " + string.Format(_patterns.BuildCmd, path.LastElement());
 
-			return buildPath.Call("cmd", c);
+			var command = string.Format(_patterns.BuildCmd, path.LastElement());
+			Log.Verbose(command);
+
+			return buildPath.Call("cmd", "/c " + command);
 		}
 
 		public int RunSqlScripts(FilePath root, FilePath script)
