@@ -9,6 +9,7 @@ namespace PlatformBuild.CmdLineProxies
 	{
 		readonly string _git;
 		const string FatalHangup = "fatal: The remote end hung up unexpectedly";
+		const string FatalConnect = "fatal: Could not read from remote repository";
 
 		public Git()
 		{
@@ -39,23 +40,23 @@ namespace PlatformBuild.CmdLineProxies
 
 		public void PullMaster(FilePath repoDir)
 		{
-			repoDir.Call("cmd", "/c " + _git + "pull --ff-only --verbose origin master");
+			repoDir.Call(_git, "pull --ff-only --verbose origin master");
 		}
 
 		public void Clone(FilePath repoDir, FilePath filePath, string repo)
 		{
-			repoDir.Call("cmd", "/c " + _git + "clone " + repo + " " + filePath.Unroot(repoDir).ToPosixPath());
+			repoDir.Call(_git, "clone " + repo + " " + filePath.Unroot(repoDir).ToPosixPath());
 		}
 
 		public void CheckoutFolder(FilePath path)
 		{
-			path.Call("cmd", "/c " + _git + "checkout . --theirs");
+			path.Call(_git, "checkout . --theirs");
 		}
 
 		public void PullCurrentBranch(FilePath modulePath, int times = 0)
 		{
 			string branch = "";
-			modulePath.Call("cmd", "/c " + _git + "status --branch --short", (o, e) =>
+			modulePath.Call(_git, "status --branch --short", (o, e) =>
 			{
 				branch = GuessBranch(o + e);
 			});
@@ -73,13 +74,17 @@ namespace PlatformBuild.CmdLineProxies
 			}
 			string s_out = "";
 			string s_err = "";
-			if (modulePath.Call("cmd", "/c " + _git +  command, (o, e) =>
+			if (modulePath.Call(_git, command, (o, e) =>
 				{
 					s_err = e;
 					s_out = o;
 				}) != 0)
 			{
-				if (s_err.Contains(FatalHangup) || s_out.Contains(FatalHangup))
+				if (
+					s_err.Contains(FatalHangup) || s_out.Contains(FatalHangup)
+					||
+					s_err.Contains(FatalConnect) || s_out.Contains(FatalConnect)
+					)
 				{
 					TryGitCommand(modulePath, times + 1, command);
 				}
