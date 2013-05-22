@@ -36,14 +36,14 @@ namespace PlatformBuild.Rules
 			{
 				var path = Paths[i];
 				var buildRuleFile = DependencyRulePath(rootPath, path);
-				if (!_files.Exists(buildRuleFile)) continue;
+				if (!_files.Exists(buildRuleFile)) { continue; }
 
 				var lines = _files.Lines(buildRuleFile);
 				foreach (var line in lines)
 				{
-                    var depRef = Paths.Index(line);
-                    if (depRef < 0)
-	                    throw new Exception(path + " requires unknown module "+line);
+					var depRef = Paths.Index(line);
+					if (depRef < 0)
+						throw new Exception(path + " requires unknown module " + line);
 					Deps[i].Add(Paths.Index(line));
 				}
 			}
@@ -66,7 +66,7 @@ namespace PlatformBuild.Rules
 				noLoops = false;
 				for (int i = 0; i < @in.Count; i++)
 				{
-                    if (SelfReferencing(@in[i])) throw new Exception(Paths[@in[i]] + " is self referencing");
+					if (SelfReferencing(@in[i])) throw new Exception(Paths[@in[i]] + " is self referencing");
 					if (CanAdd(Deps[@in[i]], @out))
 					{
 						@out.Add(@in[i]);
@@ -76,10 +76,10 @@ namespace PlatformBuild.Rules
 					}
 				}
 			}
-			if (@in.Count > 0) 
-				throw new Exception("Circular dependency. In: " 
+			if (@in.Count > 0)
+				throw new Exception("Circular dependency. In: "
 					+ string.Join(", ", @in.Select(ix => Paths[ix]))
-					+ "\r\nOut: "+ string.Join(", ",  @out.Select(ix => Paths[ix]))
+					+ "\r\nOut: " + string.Join(", ", @out.Select(ix => Paths[ix]))
 					);
 
 			var newRepos = new List<string>();
@@ -94,18 +94,19 @@ namespace PlatformBuild.Rules
 			}
 
 			Repos = newRepos.ToArray();
+			Log.Info("Build order: "+ string.Join(", ", Repos));
+
 			Paths = newPaths.ToArray();
 			Deps = newDeps.ToArray();
 		}
 
 		bool SelfReferencing(int idx)
 		{
-            var selfName = Paths[idx];
-			var depNames = Deps[idx].Select(i=>Paths[i]).ToArray();
-
+			var selfName = Paths[idx];
+			var depNames = Deps[idx].Select(i => Paths[i]).ToArray();
 
 			Log.Verbose(selfName + " <-- " + string.Join(", ", depNames));
-            return depNames.Contains(selfName);
+			return depNames.Contains(selfName);
 		}
 
 		/// <summary> (3)
@@ -128,12 +129,13 @@ namespace PlatformBuild.Rules
 
 		FilePath DependencyRulePath(FilePath filePath, string path)
 		{
-			return filePath.Navigate(_patterns.DependencyPath).Navigate((FilePath)"Depends.rule");
+			return filePath.Navigate((FilePath)path)
+				.Navigate(_patterns.DependencyPath).Navigate((FilePath)"Depends.rule");
 		}
 
 		void ReadModules(FilePath filePath)
 		{
-			Log.Verbose("Reading "+filePath.ToEnvironmentalPath());
+			Log.Verbose("Reading " + filePath.ToEnvironmentalPath());
 			var lines = _files.Lines(filePath);
 
 			var c = lines.Length;
