@@ -157,19 +157,40 @@ namespace PlatformBuild
 			foreach (var path in Modules.Paths)
 			{
 				var projPath = _rootPath.Navigate((FilePath)path);
-				var dbPath = projPath.Navigate((FilePath)"DatabaseScripts");
-				var sqlSpecificPath = dbPath.Navigate((FilePath)"SqlServer");
 
-				if (!_files.Exists(dbPath)) continue;
-				Log.Status("Scripts from " + dbPath.ToEnvironmentalPath());
+				var runMigrationsLocally = projPath.Append(new FilePath("RunMigrationsLocally.ps1")).ToEnvironmentalPath();
+				if (File.Exists(runMigrationsLocally))
+					RebuildByFluentMigration(projPath);
+				else
+					RebuildByScripts(projPath);
+			}
+		}
 
-				var finalSrcPath = (_files.Exists(sqlSpecificPath)) ? (sqlSpecificPath) : (dbPath);
+		private void RebuildByFluentMigration(FilePath projPath)
+		{
+			var createDatabase = projPath.Append(new FilePath("DatabaseScripts")).Append(new FilePath("CreateDatabase.sql"));
+			Log.Status("Creating database from " + createDatabase.ToEnvironmentalPath());
+			_builder.RunSqlScripts(projPath, createDatabase);
 
-				foreach (FilePath file in _files.SortedDescendants(finalSrcPath, "*.sql"))
-				{
-					Log.Verbose(file.LastElement());
-					_builder.RunSqlScripts(projPath, file);
-				}
+			Log.Status("Running RunMigrationsLocally.ps1");
+			projPath.Call("RunMigrationsLocally.ps1", "");
+
+		}
+
+		private void RebuildByScripts(FilePath projPath)
+		{
+			var dbPath = projPath.Navigate((FilePath) "DatabaseScripts");
+			var sqlSpecificPath = dbPath.Navigate((FilePath) "SqlServer");
+
+			if (!_files.Exists(dbPath)) return;
+			Log.Status("Scripts from " + dbPath.ToEnvironmentalPath());
+
+			var finalSrcPath = (_files.Exists(sqlSpecificPath)) ? (sqlSpecificPath) : (dbPath);
+
+			foreach (FilePath file in _files.SortedDescendants(finalSrcPath, "*.sql"))
+			{
+				Log.Verbose(file.LastElement());
+				_builder.RunSqlScripts(projPath, file);
 			}
 		}
 
