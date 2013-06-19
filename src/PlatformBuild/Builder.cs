@@ -173,8 +173,7 @@ namespace PlatformBuild
 			_builder.RunSqlScripts(projPath, createDatabase);
 
 			Log.Status("Running RunMigrationsLocally.ps1");
-			projPath.Call("RunMigrationsLocally.ps1", "");
-
+			projPath.Call("powershell", "RunMigrationsLocally.ps1");
 		}
 
 		private void RebuildByScripts(FilePath projPath)
