@@ -6,7 +6,7 @@ namespace PlatformBuild.CmdLineProxies
 {
 	public static class Cmd
 	{
-		const int ten_seconds = 10000;
+		const int twenty_seconds = 20000;
 		const int two_minutes = 120000;
 
 		public static int CallInFolder(this FilePath root, string exe, string args)
@@ -67,7 +67,7 @@ namespace PlatformBuild.CmdLineProxies
 
 		static void WaitForFinish(string callDescription, Process proc)
 		{
-			if (proc.WaitForExit(ten_seconds)) return;
+			if (proc.WaitForExit(twenty_seconds)) return;
 
 			proc.Refresh();
 			LogOutput.Log.Warning("Call taking a long time, will abort in 2 minutes: " + callDescription);

@@ -158,22 +158,22 @@ namespace PlatformBuild
 			{
 				var projPath = _rootPath.Navigate((FilePath)path);
 
-				var runMigrationsLocally = projPath.Append(new FilePath("RunMigrationsLocally.ps1")).ToEnvironmentalPath();
-				if (File.Exists(runMigrationsLocally))
-					RebuildByFluentMigration(projPath);
+				var runMigrationsLocally = projPath.Append(new FilePath("RunMigrationsLocally.ps1"));
+				if (_files.Exists(runMigrationsLocally))
+					RebuildByFluentMigration(projPath, runMigrationsLocally);
 				else
 					RebuildByScripts(projPath);
 			}
 		}
 
-		private void RebuildByFluentMigration(FilePath projPath)
+		private void RebuildByFluentMigration(FilePath projPath, FilePath psScript)
 		{
 			var createDatabase = projPath.Append(new FilePath("DatabaseScripts")).Append(new FilePath("CreateDatabase.sql"));
 			Log.Status("Creating database from " + createDatabase.ToEnvironmentalPath());
 			_builder.RunSqlScripts(projPath, createDatabase);
 
 			Log.Status("Running RunMigrationsLocally.ps1");
-			projPath.Call("powershell", "RunMigrationsLocally.ps1");
+			projPath.Call("powershell " + psScript.ToEnvironmentalPath(), "");
 		}
 
 		private void RebuildByScripts(FilePath projPath)
