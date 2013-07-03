@@ -6,9 +6,6 @@ namespace PlatformBuild.CmdLineProxies
 {
 	public static class Cmd
 	{
-		const int twenty_seconds = 20000;
-		const int two_minutes = 120000;
-
 		public static int CallInFolder(this FilePath root, string exe, string args)
 		{
 			return Call(root, root.Navigate((FilePath)exe).ToEnvironmentalPath(), args);
@@ -18,7 +15,7 @@ namespace PlatformBuild.CmdLineProxies
 		{
 			var errFile = Path.GetTempFileName();
 			var outFile = Path.GetTempFileName();
-			var fullArgs = "/c \"" + exe + " "  + args + " > " + outFile + " 2> " + errFile + "\"";
+			var fullArgs = "/c \"" + exe + " " + args + " > " + outFile.Replace(" ", "^ ") + " 2> " + errFile.Replace(" ", "^ ") + "\"";
 			var processStartInfo = new ProcessStartInfo
 			{
 				FileName = "cmd",
@@ -67,11 +64,11 @@ namespace PlatformBuild.CmdLineProxies
 
 		static void WaitForFinish(string callDescription, Process proc)
 		{
-			if (proc.WaitForExit(twenty_seconds)) return;
+			if (proc.WaitForExit(TimeSpan.FromSeconds(20).Milliseconds)) return;
 
 			proc.Refresh();
 			LogOutput.Log.Warning("Call taking a long time, will abort in 2 minutes: " + callDescription);
-			if (!proc.WaitForExit(two_minutes))
+			if (!proc.WaitForExit(TimeSpan.FromMinutes(2).Milliseconds))
 			{
 				LogOutput.Log.Error("ABORTING LONG CALL: " + callDescription);
 				// ReSharper disable EmptyGeneralCatchClause
