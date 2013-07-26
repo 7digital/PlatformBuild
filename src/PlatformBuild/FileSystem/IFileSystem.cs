@@ -14,5 +14,6 @@ namespace PlatformBuild.FileSystem
 		void CopyDirectory(FilePath src, FilePath dst);
 		bool DirectoryExists(FilePath p);
 		bool IsFile(FilePath target);
+		void Move(FilePath source, FilePath destination);
 	}
 }
