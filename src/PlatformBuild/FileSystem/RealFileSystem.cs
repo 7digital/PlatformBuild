@@ -82,13 +82,6 @@ namespace PlatformBuild.FileSystem
 			return File.Exists(target.ToEnvironmentalPath());
 		}
 
-		public void Move(FilePath source, FilePath destination)
-		{
-			if (File.Exists(destination.ToEnvironmentalPath()))
-				File.Delete(destination.ToEnvironmentalPath());
-			File.Move(source.ToEnvironmentalPath(), destination.ToEnvironmentalPath());
-		}
-
 		public bool DirectoryExists(FilePath p)
 		{
 			return Directory.Exists(p.ToEnvironmentalPath());
