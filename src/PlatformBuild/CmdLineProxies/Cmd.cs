@@ -64,11 +64,11 @@ namespace PlatformBuild.CmdLineProxies
 
 		static void WaitForFinish(string callDescription, Process proc)
 		{
-			if (proc.WaitForExit(TimeSpan.FromSeconds(20).Milliseconds)) return;
+			if (proc.WaitForExit((int)TimeSpan.FromSeconds(20).TotalMilliseconds)) return;
 
 			proc.Refresh();
 			LogOutput.Log.Warning("Call taking a long time, will abort in 2 minutes: " + callDescription);
-			if (!proc.WaitForExit(TimeSpan.FromMinutes(2).Milliseconds))
+			if (!proc.WaitForExit((int)TimeSpan.FromMinutes(2).TotalMilliseconds))
 			{
 				LogOutput.Log.Error("ABORTING LONG CALL: " + callDescription);
 				// ReSharper disable EmptyGeneralCatchClause
