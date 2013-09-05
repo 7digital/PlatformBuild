@@ -9,5 +9,6 @@ namespace PlatformBuild.Rules
 		public string DependencyPattern { get; set; }
 		public string BuildPattern { get; set; }
 		public string BuildCmd { get; set; }
+		public CopyPath[] CopyPaths { get; set; }
 	}
 }

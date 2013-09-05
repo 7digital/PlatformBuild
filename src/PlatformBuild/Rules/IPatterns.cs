@@ -10,5 +10,6 @@ namespace PlatformBuild.Rules
 
 		string BuildPattern { get; }
 		string BuildCmd { get; }
+		CopyPath[] CopyPaths { get; set; }
 	}
 }

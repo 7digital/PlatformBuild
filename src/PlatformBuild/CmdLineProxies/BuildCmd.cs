@@ -21,10 +21,13 @@ namespace PlatformBuild.CmdLineProxies
 			var path = _files.GetFirstMatch(buildPath, _patterns.BuildPattern);
 			if (path == null) return 0;
 
-			// TODO -- break this out into a rule
-			_files.CopyDirectory(
-				rootPath.Navigate((FilePath)"_build"),
-				buildPath.Navigate((FilePath)"build"));
+			foreach (var copyPath in _patterns.CopyPaths)
+			{
+				var src = rootPath.Navigate(copyPath.Source);
+				var dst = buildPath.Navigate(copyPath.Destination);
+				if (_files.Exists(src))
+					_files.CopyDirectory(src, dst);
+			}
 
 			var command = string.Format(_patterns.BuildCmd, path.LastElement());
 			Log.Verbose(command);

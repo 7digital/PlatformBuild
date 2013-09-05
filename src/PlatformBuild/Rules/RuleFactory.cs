@@ -26,11 +26,13 @@ namespace PlatformBuild.Rules
 			var libPatt = _rootDirectory.Navigate((FilePath)"_rules/DependencyPatterns.rule");
 			var masters = _rootDirectory.Navigate((FilePath)"_rules/Masters.rule");
 			var build = _rootDirectory.Navigate((FilePath)"_rules/BuildCommand.rule");
+			var copyPaths = _rootDirectory.Navigate((FilePath)"_rules/CopyArtifacts.rule");
 
 			if (!_files.Exists(libPath)) throw new Exception("_rules/DependencyPath.rule is missing");
 			if (!_files.Exists(libPatt)) throw new Exception("_rules/DependencyPatterns.rule is missing");
 			if (!_files.Exists(masters)) throw new Exception("_rules/Masters.rule is missing");
 			if (!_files.Exists(build)) throw new Exception("_rules/BuildCommand.rule is missing");
+			if (!_files.Exists(copyPaths)) throw new Exception("_rules/CopyArtifacts.rule is missing");
 
 			var bcmd = _files.Lines(build).First().Split('=');
 
@@ -40,7 +42,18 @@ namespace PlatformBuild.Rules
 				DependencyPattern = string.Join("|", _files.Lines(libPatt)),
 				Masters = _files.Lines(masters).Select(str => (FilePath)str).ToArray(),
 				BuildCmd = bcmd[1].Trim(),
-				BuildPattern = bcmd[0].Trim()
+				BuildPattern = bcmd[0].Trim(),
+				CopyPaths = _files.Lines(copyPaths).Select(ParseCopyPath).ToArray()
+			};
+		}
+
+		public CopyPath ParseCopyPath(string p)
+		{
+			var ps = p.Split('=');
+			if (ps.Length != 2) throw new Exception("CopyArtifacts file should be lines of \"source/path = dest/path\"");
+			return new CopyPath {
+				Source = new FilePath(ps[0].Trim()),
+				Destination = new FilePath(ps[1].Trim())
 			};
 		}
 
