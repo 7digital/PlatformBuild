@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
+using RunProcess;
 
 namespace PlatformBuild.CmdLineProxies
 {
@@ -13,74 +15,26 @@ namespace PlatformBuild.CmdLineProxies
 
 		public static int Call(this FilePath root, string exe, string args, Action<string, string> stdOutErr = null)
 		{
-			var errFile = Path.GetTempFileName();
-			var outFile = Path.GetTempFileName();
-			var fullArgs = "/c \"" + exe + " " + args + " > " + outFile.Replace(" ", "^ ") + " 2> " + errFile.Replace(" ", "^ ") + "\"";
-			var processStartInfo = new ProcessStartInfo
+			using (var proc = new ProcessHost(exe, root.ToEnvironmentalPath()))
 			{
-				FileName = "cmd",
-				Arguments = fullArgs,
-				ErrorDialog = false,
-				UseShellExecute = false,
-				WindowStyle = ProcessWindowStyle.Hidden,
-				CreateNoWindow = true,
-				WorkingDirectory = root.ToEnvironmentalPath(),
-			};
+				proc.Start(args);
+				int exitCode;
 
-			var callDescription = root.ToEnvironmentalPath() + ":\r\n" + exe + " " + fullArgs;
+				if (!proc.WaitForExit(TimeSpan.FromMinutes(5), out exitCode))
+					throw new Exception("Process failed to end");
 
+				var messages = proc.StdOut.ReadAllText(Encoding.UTF8);
+				var errors = proc.StdErr.ReadAllText(Encoding.UTF8);
 
-			var exitCode = RunProcess(stdOutErr, processStartInfo, callDescription);
+				if (exitCode != 0) LogOutput.Log.Error(messages);
+				else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(messages);
 
+				if (exitCode != 0) LogOutput.Log.Error(errors);
+				else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(errors);
 
-			var messages = File.ReadAllText(outFile).Trim();
-			var errors = File.ReadAllText(errFile).Trim();
-			File.Delete(outFile);
-			File.Delete(errFile);
+				if (stdOutErr != null) stdOutErr(messages, errors);
 
-			if (exitCode != 0) LogOutput.Log.Error(messages);
-			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(messages);
-
-			if (exitCode != 0) LogOutput.Log.Error(errors);
-			else if (!string.IsNullOrWhiteSpace(messages)) LogOutput.Log.Info(errors);
-
-			if (stdOutErr != null) stdOutErr(messages, errors);
-
-			return exitCode;
-		}
-
-		static int RunProcess(Action<string, string> stdOutErr, ProcessStartInfo processStartInfo, string callDescription)
-		{
-			LogOutput.Log.Verbose("cmd started: " + callDescription);
-			using (var proc = Process.Start(processStartInfo))
-			{
-				WaitForFinish(callDescription, proc);
-
-				LogOutput.Log.Verbose("cmd finished: " + callDescription);
-
-				return proc.ExitCode;
-			}
-		}
-
-		static void WaitForFinish(string callDescription, Process proc)
-		{
-			if (proc.WaitForExit((int)TimeSpan.FromSeconds(20).TotalMilliseconds)) return;
-
-			proc.Refresh();
-			LogOutput.Log.Warning("Call taking a long time, will abort in 2 minutes: " + callDescription);
-			if (!proc.WaitForExit((int)TimeSpan.FromMinutes(2).TotalMilliseconds))
-			{
-				LogOutput.Log.Error("ABORTING LONG CALL: " + callDescription);
-				// ReSharper disable EmptyGeneralCatchClause
-				try
-				{
-					proc.Kill();
-					proc.Refresh();
-				}
-				catch
-				{
-				}
-				// ReSharper restore EmptyGeneralCatchClause
+				return exitCode;
 			}
 		}
 	}

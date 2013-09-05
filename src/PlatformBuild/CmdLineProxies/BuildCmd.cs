@@ -21,6 +21,7 @@ namespace PlatformBuild.CmdLineProxies
 			var path = _files.GetFirstMatch(buildPath, _patterns.BuildPattern);
 			if (path == null) return 0;
 
+			// TODO -- break this out into a rule
 			_files.CopyDirectory(
 				rootPath.Navigate((FilePath)"_build"),
 				buildPath.Navigate((FilePath)"build"));
