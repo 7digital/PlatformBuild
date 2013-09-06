@@ -72,22 +72,47 @@ namespace PlatformBuild.FileSystem
 			if (!DirectoryExists(src)) throw new Exception("Source was not a folder or doesn't exist");
 
 			if (IsFile(dst)) throw new Exception("Destination already exists as a file");
-			if (DirectoryExists(dst)) DeletePath(dst);
+			if (DirectoryExists(dst))
+			{
+				try
+				{
+					DeletePath(dst);
+				}
+				catch
+				{
+					throw new Exception("Tried to delete " + dst + " to replace it, but failed");
+				}
+			}
 
 			DirectoryCopy(src.ToEnvironmentalPath(), dst.ToEnvironmentalPath(), true);
 		}
 
 		public bool IsFile(FilePath target)
 		{
-			return File.Exists(target.ToEnvironmentalPath());
+			try
+			{
+				return File.Exists(target.ToEnvironmentalPath());
+			}
+			catch
+			{
+				return false;
+			}
 		}
 
 		public bool DirectoryExists(FilePath p)
 		{
-			return Directory.Exists(p.ToEnvironmentalPath());
+			try
+			{
+				return Directory.Exists(p.ToEnvironmentalPath());
+			}
+			catch
+			{
+				return false;
+			}
 		}
 
 		/// <summary>
+		/// Recursive directory copy, with git folder filter
 		/// Actually recommended by MS, rather than fixing the base class library
 		/// http://msdn.microsoft.com/en-us/library/bb762914.aspx
 		/// </summary>
