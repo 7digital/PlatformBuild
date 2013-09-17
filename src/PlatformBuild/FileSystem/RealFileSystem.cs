@@ -38,10 +38,11 @@ namespace PlatformBuild.FileSystem
 
 		public IEnumerable<FilePath> SortedDescendants(FilePath filePath, string pattern)
 		{
-			var list = Directory.GetFiles(filePath.ToEnvironmentalPath(), pattern, SearchOption.AllDirectories)
+			return Directory.GetFiles(filePath.ToEnvironmentalPath(), pattern, SearchOption.AllDirectories)
+				.Select(p => new { Directory = Path.GetDirectoryName(p), Filename = Path.GetFileName(p) })
+				.OrderBy(f => f.Filename)
+				.Select(f => new FilePath(Path.Combine(f.Directory, f.Filename)))
 				.ToList();
-			list.Sort();
-			return list.Select(f => new FilePath(f));
 		}
 
 		public void DeletePath(FilePath path)
