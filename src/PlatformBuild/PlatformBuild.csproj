@@ -59,6 +59,7 @@
     <Compile Include="FileSystem\RealFileSystem.cs" />
     <Compile Include="Rules\Patterns.cs" />
     <Compile Include="Rules\RuleFactory.cs" />
+    <Compile Include="Rules\UnknownModuleException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

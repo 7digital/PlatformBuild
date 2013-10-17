@@ -10,7 +10,7 @@ namespace PlatformBuild.DependencyManagement
 	{
 		readonly IPatterns _patterns;
 		readonly Dictionary<string, FileInfo> _available;
-        readonly Dictionary<string, FileInfo> _masters;
+		readonly Dictionary<string, FileInfo> _masters;
 
 		public DependencyManager(IPatterns patterns)
 		{
@@ -22,19 +22,19 @@ namespace PlatformBuild.DependencyManagement
 		public void CopyBuildResultsTo(FilePath dest)
 		{
 			// For every file in dest, if we have a newer copy then overwrite dest file.
-            // masters always override other available files
+			// masters always override other available files
 			if (!Directory.Exists(dest.ToEnvironmentalPath())) return;
-            var files = Directory.GetFiles(dest.ToEnvironmentalPath(), _patterns.DependencyPattern, SearchOption.TopDirectoryOnly);
+			var files = Directory.GetFiles(dest.ToEnvironmentalPath(), _patterns.DependencyPattern, SearchOption.TopDirectoryOnly);
 			foreach (var target in files)
 			{
 				var name = Path.GetFileName(target);
 				if (name == null) continue;
 
-                var source = _masters.Of(name) ?? _available.Of(name);
+				var source = _masters.Of(name) ?? _available.Of(name);
 
 				if (source == null)
 				{
-				    Log.Verbose("No source for => " + target);
+					Log.Verbose("No source for => " + target);
 					continue;
 				}
 
@@ -75,7 +75,7 @@ namespace PlatformBuild.DependencyManagement
 			foreach (var master in masters)
 			{
 				var fullPath = rootPath.Navigate(master);
-			    if (!Directory.Exists(fullPath.ToEnvironmentalPath())) continue;
+				if (!Directory.Exists(fullPath.ToEnvironmentalPath())) continue;
 
 				SetByLatest(fullPath, _masters, "*");
 			}

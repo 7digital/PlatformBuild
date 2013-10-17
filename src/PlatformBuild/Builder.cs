@@ -41,7 +41,20 @@ namespace PlatformBuild
 
 			_patterns = _rules.GetRulePatterns();
 			Modules = _rules.GetModules();
-			Modules.ReadDependencies(_rootPath);
+			try
+			{
+				Modules.ReadDependencies(_rootPath);
+			}
+			catch (UnknownModuleException ex)
+			{
+				Log.Error(ex.Message + ", will pull all repositories. You will need to retry platform build.");
+
+				_locks = Modules.CreateAndSetLocks();
+				PullRepos();
+				CloneMissingRepos();
+
+				throw;
+			}
 			Modules.SortInDependencyOrder();
 
 			_depMgr.ReadMasters(_rootPath, _patterns.Masters);

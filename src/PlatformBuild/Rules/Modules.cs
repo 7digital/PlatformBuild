@@ -39,6 +39,10 @@ namespace PlatformBuild.Rules
 		/// </summary>
 		public void ReadDependencies(FilePath rootPath)
 		{
+			bool missingModule = false;
+			string lastMissingModule = "";
+			string lastFailedPath = "";
+
 			ReadModules(_moduleRulePath);
 			for (int i = 0; i < Paths.Length; i++)
 			{
@@ -51,9 +55,18 @@ namespace PlatformBuild.Rules
 				{
 					var depRef = Paths.Index(line);
 					if (depRef < 0)
-						throw new Exception(path + " requires unknown module " + line);
+					{
+						lastMissingModule = line;
+						lastFailedPath = path;
+						missingModule = true;
+					}
 					Deps[i].Add(Paths.Index(line));
 				}
+			}
+
+			if (missingModule)
+			{
+				throw new UnknownModuleException(lastFailedPath + " requires unknown module " + lastMissingModule);
 			}
 		}
 
