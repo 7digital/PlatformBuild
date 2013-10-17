@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using PlatformBuild.CmdLineProxies;
 using PlatformBuild.DependencyManagement;
@@ -154,7 +155,9 @@ namespace PlatformBuild
 
 		public void RebuildDatabases()
 		{
-			foreach (var path in Modules.Paths)
+			var uniquePaths = Deduplicate(Modules.Paths, Modules.Repos);
+
+			foreach (var path in uniquePaths)
 			{
 				var projPath = _rootPath.Navigate((FilePath)path);
 
@@ -164,6 +167,31 @@ namespace PlatformBuild
 				else
 					RebuildByScripts(projPath);
 			}
+		}
+
+		/// <summary>
+		/// Remove paths with duplicated source repos.
+		/// Remove paths that have DatabaseScripts added by sub-repo
+		/// </summary>
+		IEnumerable<string> Deduplicate(string[] paths, string[] repos)
+		{
+			var parents = paths.Where(p=>p.ToLower().EndsWith("/databasescripts")).Select(p=>TruncRight(p, 16)).ToList();
+			var seen = new List<string>();
+			var outp = new List<string>();
+
+			for (int i = 0; i < paths.Length; i++)
+			{
+				if (seen.Contains(repos[i])) continue;
+				if (parents.Contains(paths[i])) continue;
+				seen.Add(repos[i]);
+				outp.Add(paths[i]);
+			}
+			return outp;
+		}
+
+		string TruncRight(string s, int i)
+		{
+			return s.Substring(0, s.Length-i);
 		}
 
 		private void RebuildByFluentMigration(FilePath projPath, FilePath psScript)
@@ -179,14 +207,20 @@ namespace PlatformBuild
 		private void RebuildByScripts(FilePath projPath)
 		{
 			var dbPath = projPath.Navigate((FilePath) "DatabaseScripts");
+			var selfPath = projPath.Navigate((FilePath)"../DatabaseScripts");
 			var sqlSpecificPath = dbPath.Navigate((FilePath) "SqlServer");
 
-			if (!_files.Exists(dbPath)) return;
+			if (!_files.Exists(dbPath))
+			{
+				if (_files.Exists(selfPath)) dbPath = selfPath;
+				else return;
+			}
+
 			Log.Status("Scripts from " + dbPath.ToEnvironmentalPath());
 
 			var finalSrcPath = (_files.Exists(sqlSpecificPath)) ? (sqlSpecificPath) : (dbPath);
 
-			foreach (FilePath file in _files.SortedDescendants(finalSrcPath, "*.sql"))
+			foreach (var file in _files.SortedDescendants(finalSrcPath, "*.sql"))
 			{
 				Log.Verbose(file.LastElement());
 				_builder.RunSqlScripts(projPath, file);

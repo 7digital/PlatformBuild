@@ -14,7 +14,15 @@ namespace PlatformBuild.Rules
 		readonly FilePath _moduleRulePath;
 		readonly IFileSystem _files;
 		readonly IPatterns _patterns;
+
+		/// <summary>
+		/// Repository urls. Indexes are same as the target filesystem paths
+		/// </summary>
 		public string[] Repos { get; set; }
+
+		/// <summary>
+		/// Filesystem paths. Indexes are same as the source repository url.
+		/// </summary>
 		public string[] Paths { get; set; }
 		public List<int>[] Deps { get; set; }
 
