@@ -38,7 +38,7 @@ namespace PlatformBuild.CmdLineProxies
 		public int RunSqlScripts(FilePath root, FilePath script)
 		{
 			Log.Status("                           " + script.LastElement());
-			return root.Call("sqlcmd.exe", " -i \"" + script.ToEnvironmentalPath() + "\" -S . -E");
+			return root.Call("sqlcmd.exe", "-f 65001 -i \"" + script.ToEnvironmentalPath() + "\" -S . -E");
 		}
 	}
 }
